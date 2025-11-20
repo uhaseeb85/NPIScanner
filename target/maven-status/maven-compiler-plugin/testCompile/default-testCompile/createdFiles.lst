@@ -1,0 +1,16 @@
+com\scanner\ScanConfigurationTest.class
+com\scanner\ScanExceptionTest.class
+com\scanner\HtmlReportGeneratorTest.class
+com\scanner\LogStatementTest.class
+com\scanner\ScannerExceptionTest.class
+com\scanner\ConfigurationExceptionTest.class
+com\scanner\JavaFileScannerTest.class
+com\scanner\LogStatementAnalyzerTest.class
+com\scanner\DetectionTest.class
+com\scanner\KeywordPatternTest.class
+com\scanner\ScanStatisticsTest.class
+com\scanner\SensitiveDataScannerAppTest.class
+com\scanner\ConfigurationLoaderTest.class
+com\scanner\ReportExceptionTest.class
+com\scanner\SensitiveDataDetectorTest.class
+com\scanner\SensitiveDataScannerAppIntegrationTest.class

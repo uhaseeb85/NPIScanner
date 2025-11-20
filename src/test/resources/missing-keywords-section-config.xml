@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scan-configuration>
+    <sensitive-object-types>
+        <object-type type="plain">request</object-type>
+    </sensitive-object-types>
+</scan-configuration>

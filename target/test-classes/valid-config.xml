@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scan-configuration>
+    <keywords>
+        <keyword type="plain">ssn</keyword>
+        <keyword type="plain">socialSecurity</keyword>
+        <keyword type="plain">debitCard</keyword>
+        <keyword type="plain">pin</keyword>
+        <keyword type="plain">dateOfBirth</keyword>
+        <keyword type="plain">dob</keyword>
+        <keyword type="regex">.*password.*</keyword>
+        <keyword type="regex">credit[Cc]ard.*</keyword>
+    </keywords>
+    <sensitive-object-types>
+        <object-type type="plain">request</object-type>
+        <object-type type="plain">response</object-type>
+        <object-type type="plain">httpResponse</object-type>
+        <object-type type="plain">apiResponse</object-type>
+        <object-type type="plain">requestBody</object-type>
+        <object-type type="plain">responseBody</object-type>
+        <object-type type="regex">.*Request</object-type>
+        <object-type type="regex">.*Response</object-type>
+    </sensitive-object-types>
+</scan-configuration>

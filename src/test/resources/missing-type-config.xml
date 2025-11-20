@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scan-configuration>
+    <keywords>
+        <keyword type="plain">ssn</keyword>
+        <keyword>pin</keyword>
+    </keywords>
+    <sensitive-object-types>
+    </sensitive-object-types>
+</scan-configuration>

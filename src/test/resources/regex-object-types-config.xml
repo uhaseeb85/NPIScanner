@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scan-configuration>
+    <keywords>
+    </keywords>
+    <sensitive-object-types>
+        <object-type type="regex">.*Request</object-type>
+        <object-type type="regex">.*Response</object-type>
+        <object-type type="regex">.*Body</object-type>
+    </sensitive-object-types>
+</scan-configuration>
