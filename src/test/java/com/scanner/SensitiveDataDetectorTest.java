@@ -1046,4 +1046,48 @@ class SensitiveDataDetectorTest {
         // Should detect both keywords in string literals
         assertEquals(2, detections.size());
     }
+
+    @Test
+    void testDetectSensitiveData_StringLiteralOnly_NotDetected() {
+        LogStatement logStatement = new LogStatement("Test.java", 40, 
+            "logger.info(\"SSN: \");");
+        
+        List<KeywordPattern> patterns = new ArrayList<>();
+        patterns.add(new KeywordPattern("ssn", false));
+        
+        ScanConfiguration config = new ScanConfiguration(patterns, new ArrayList<>());
+        
+        List<Detection> detections = detector.detectSensitiveData(logStatement, config);
+        
+        // Should NOT detect - it's just a hardcoded string with no variables
+        assertTrue(detections.isEmpty());
+    }
+
+    @Test
+    void testDetectSensitiveData_MultipleStringLiteralsOnly_NotDetected() {
+        LogStatement logStatement = new LogStatement("Test.java", 45, 
+            "logger.info(\"SSN: \" + \"Password: \");");
+        
+        List<KeywordPattern> patterns = new ArrayList<>();
+        patterns.add(new KeywordPattern("ssn", false));
+        patterns.add(new KeywordPattern("password", false));
+        
+        ScanConfiguration config = new ScanConfiguration(patterns, new ArrayList<>());
+        
+        List<Detection> detections = detector.detectSensitiveData(logStatement, config);
+        
+        // Should NOT detect - only string literals, no variables
+        assertEquals(0, detections.size(), "Should not detect when only string literals are concatenated");
+    }
+    
+    @Test
+    void testHasNonLiteralContent() {
+        // Should return true for statements with variables
+        assertTrue(detector.hasNonLiteralContent("logger.info(\"SSN: \" + ssn);"));
+        assertTrue(detector.hasNonLiteralContent("System.out.println(\"User: \" + user);"));
+        
+        // Should return false for statements with only string literals
+        assertFalse(detector.hasNonLiteralContent("logger.info(\"SSN: \");"));
+        assertFalse(detector.hasNonLiteralContent("logger.info(\"SSN: \" + \"Password: \");"));
+    }
 }

@@ -196,22 +196,28 @@ public class SensitiveDataDetector {
         
         // NEW: Check for sensitive keywords within string literals
         // This detects cases like: logger.info("SSN: " + anyVariable)
-        List<String> stringLiterals = extractStringLiterals(statement);
+        // Only check if the statement contains variables/methods being logged
+        // (not just a plain string literal with no dynamic data)
+        boolean hasVariablesOrMethodsOutsideLiterals = hasNonLiteralContent(statement);
         
-        for (String literal : stringLiterals) {
-            for (KeywordPattern pattern : config.getPatterns()) {
-                // Check if the string literal content contains the sensitive keyword
-                if (containsKeyword(literal, pattern)) {
-                    String detectionKey = "literal:" + pattern.getKeyword();
-                    if (!detectedIdentifiers.contains(detectionKey)) {
-                        detections.add(new Detection(
-                            logStatement.getFileName(),
-                            logStatement.getLineNumber(),
-                            pattern.getKeyword() + " (in string literal)",
-                            statement
-                        ));
-                        detectedIdentifiers.add(detectionKey);
-                        break; // Only create one detection per keyword in literals
+        if (hasVariablesOrMethodsOutsideLiterals) {
+            List<String> stringLiterals = extractStringLiterals(statement);
+            
+            for (String literal : stringLiterals) {
+                for (KeywordPattern pattern : config.getPatterns()) {
+                    // Check if the string literal content contains the sensitive keyword
+                    if (containsKeyword(literal, pattern)) {
+                        String detectionKey = "literal:" + pattern.getKeyword();
+                        if (!detectedIdentifiers.contains(detectionKey)) {
+                            detections.add(new Detection(
+                                logStatement.getFileName(),
+                                logStatement.getLineNumber(),
+                                pattern.getKeyword() + " (in string literal)",
+                                statement
+                            ));
+                            detectedIdentifiers.add(detectionKey);
+                            break; // Only create one detection per keyword in literals
+                        }
                     }
                 }
             }
@@ -532,5 +538,56 @@ public class SensitiveDataDetector {
             // For plain text keywords, do case-insensitive substring matching
             return literal.toLowerCase().contains(keyword.toLowerCase());
         }
+    }
+    
+    /**
+     * Checks if a log statement contains non-literal content (variables, method calls, etc.).
+     * This helps determine if the statement is logging dynamic data or just a static string.
+     * 
+     * @param statement the log statement to check
+     * @return true if the statement contains variables/methods outside of string literals
+     */
+    boolean hasNonLiteralContent(String statement) {
+        if (statement == null || statement.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Remove all string literals from the statement
+        String withoutLiterals = statement.replaceAll("\"[^\"]*\"", "");
+        
+        // Remove common logging patterns to isolate potential variables
+        String cleaned = withoutLiterals
+            .replaceAll("(logger|log|LOGGER|LOG)\\s*\\.\\s*(info|debug|warn|error|trace|fatal)\\s*\\(", "")
+            .replaceAll("System\\s*\\.\\s*(out|err)\\s*\\.\\s*(print|println|printf)\\s*\\(", "")
+            .replaceAll("[\\(\\);]", "")  // Remove parentheses and semicolons
+            .replaceAll("\\s+", " ")       // Normalize whitespace
+            .trim();
+        
+        // If there's a + operator, check what's around it
+        if (cleaned.contains("+")) {
+            // Split by + and check if any part has actual content (not just whitespace)
+            String[] parts = cleaned.split("\\+");
+            for (String part : parts) {
+                String trimmed = part.trim();
+                // If there's any non-empty content, it's likely a variable
+                if (!trimmed.isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        
+        // Check if there are any identifiers left (potential variables)
+        // Match word characters that could be variable names
+        Pattern identifierPattern = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
+        Matcher matcher = identifierPattern.matcher(cleaned);
+        while (matcher.find()) {
+            String identifier = matcher.group();
+            // If we find any identifier, it's likely a variable
+            if (!identifier.isEmpty()) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }
