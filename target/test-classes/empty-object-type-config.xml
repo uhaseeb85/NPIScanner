@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scan-configuration>
-    <keywords>
-    </keywords>
-    <sensitive-object-types>
-        <object-type type="plain">request</object-type>
-        <object-type type="plain"></object-type>
-    </sensitive-object-types>
-</scan-configuration>
