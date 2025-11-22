@@ -25,7 +25,8 @@ public class ConfigurationLoader {
      *
      * @param configFilePath the path to the XML configuration file
      * @return a ScanConfiguration object containing the parsed patterns
-     * @throws ConfigurationException if the file is not found, invalid, or contains errors
+     * @throws ConfigurationException if the file is not found, invalid, or contains
+     *                                errors
      */
     public ScanConfiguration loadConfiguration(String configFilePath) throws ConfigurationException {
         if (configFilePath == null || configFilePath.trim().isEmpty()) {
@@ -49,8 +50,9 @@ public class ConfigurationLoader {
 
             List<KeywordPattern> patterns = parseKeywords(document);
             List<KeywordPattern> sensitiveObjectTypes = parseSensitiveObjectTypes(document);
+            List<KeywordPattern> exclusions = parseExclusions(document);
 
-            return new ScanConfiguration(patterns, sensitiveObjectTypes);
+            return new ScanConfiguration(patterns, sensitiveObjectTypes, exclusions);
 
         } catch (ParserConfigurationException e) {
             throw new ConfigurationException("Failed to configure XML parser", e);
@@ -126,10 +128,48 @@ public class ConfigurationLoader {
             try {
                 objectTypes.add(new KeywordPattern(objectType, isRegex));
             } catch (PatternSyntaxException e) {
-                throw new ConfigurationException("Invalid regex pattern for object-type: " + objectType + " - " + e.getMessage(), e);
+                throw new ConfigurationException(
+                        "Invalid regex pattern for object-type: " + objectType + " - " + e.getMessage(), e);
             }
         }
 
         return objectTypes;
+    }
+
+    /**
+     * Parses exclusion elements from the XML document.
+     *
+     * @param xmlDoc the parsed XML document
+     * @return a list of KeywordPattern objects representing exclusions
+     * @throws ConfigurationException if there are errors parsing exclusions
+     */
+    private List<KeywordPattern> parseExclusions(Document xmlDoc) throws ConfigurationException {
+        List<KeywordPattern> exclusions = new ArrayList<>();
+        NodeList exclusionNodes = xmlDoc.getElementsByTagName("exclusion");
+
+        for (int i = 0; i < exclusionNodes.getLength(); i++) {
+            Element exclusionElement = (Element) exclusionNodes.item(i);
+            String exclusion = exclusionElement.getTextContent().trim();
+            String type = exclusionElement.getAttribute("type");
+
+            if (exclusion.isEmpty()) {
+                throw new ConfigurationException("Empty exclusion found at position " + i);
+            }
+
+            if (type.isEmpty()) {
+                throw new ConfigurationException("Missing 'type' attribute for exclusion: " + exclusion);
+            }
+
+            boolean isRegex = "regex".equalsIgnoreCase(type);
+
+            try {
+                exclusions.add(new KeywordPattern(exclusion, isRegex));
+            } catch (PatternSyntaxException e) {
+                throw new ConfigurationException(
+                        "Invalid regex pattern for exclusion: " + exclusion + " - " + e.getMessage(), e);
+            }
+        }
+
+        return exclusions;
     }
 }

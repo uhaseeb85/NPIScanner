@@ -40,4 +40,14 @@
         <object-type type="regex">.*Response</object-type>
         <object-type type="regex">.*Body</object-type>
     </sensitive-object-types>
+    
+    <exclusions>
+        <!-- Exclude common test files or safe logging patterns -->
+        <exclusion type="plain">test-data</exclusion>
+        <exclusion type="plain">mock</exclusion>
+        
+        <!-- Regex exclusions -->
+        <exclusion type="regex">.*[Tt]est.*</exclusion>
+        <exclusion type="regex">.*[Ee]xample.*</exclusion>
+    </exclusions>
 </scan-configuration>

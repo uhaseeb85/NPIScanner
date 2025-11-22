@@ -23,7 +23,7 @@ A Java-based command-line utility that scans Java codebases to detect sensitive 
 
 ## Requirements
 
-- Java 11 or higher
+- Java 8 or higher
 - Maven 3.6 or higher
 
 ## Building the Project
