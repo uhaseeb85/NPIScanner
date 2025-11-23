@@ -180,10 +180,6 @@ public class HtmlReportGenerator {
             html.append("                    </select>\n");
             html.append("                </div>\n");
             html.append("            </div>\n");
-            html.append("            <div class=\"results-info\">\n");
-            html.append("                <span id=\"resultsCount\">Showing ").append(detections.size())
-                    .append(" of ").append(detections.size()).append(" detections</span>\n");
-            html.append("            </div>\n");
             html.append("        </div>\n");
 
             // Detection table
@@ -216,7 +212,6 @@ public class HtmlReportGenerator {
             html.append("        const resetFilters = document.getElementById('resetFilters');\n");
             html.append("        const exportCsv = document.getElementById('exportCsv');\n");
             html.append("        const tableBody = document.getElementById('tableBody');\n");
-            html.append("        const resultsCount = document.getElementById('resultsCount');\n");
             html.append("        \n");
             html.append("        searchBox.addEventListener('input', applyFilters);\n");
             html.append("        fileFilter.addEventListener('change', applyFilters);\n");
@@ -253,8 +248,6 @@ public class HtmlReportGenerator {
             html.append("                }\n");
             html.append("            });\n");
             html.append("            \n");
-            html.append(
-                    "            resultsCount.textContent = `Showing ${visibleCount} of ${rows.length} detections`;\n");
             html.append("        }\n");
             html.append("        \n");
             html.append("        // Table sorting\n");
@@ -332,42 +325,56 @@ public class HtmlReportGenerator {
      *
      * @return CSS styles as a string
      */
+    /**
+     * Returns the CSS styles for the HTML report.
+     *
+     * @return CSS styles as a string
+     */
     private String getCssStyles() {
         return "* { margin: 0; padding: 0; box-sizing: border-box; }\n" +
                 ":root {\n" +
                 "    --bg-primary: #f8f9fa;\n" +
                 "    --bg-secondary: #ffffff;\n" +
-                "    --bg-tertiary: #f1f3f5;\n" +
+                "    --bg-tertiary: #e9ecef;\n" +
                 "    --text-primary: #212529;\n" +
                 "    --text-secondary: #6c757d;\n" +
-                "    --accent-primary: #667eea;\n" +
-                "    --accent-secondary: #764ba2;\n" +
-                "    --success: #51cf66;\n" +
-                "    --danger: #ff6b6b;\n" +
+                "    --accent-primary: #0f172a;\n" +
+                "    --accent-secondary: #334155;\n" +
+                "    --success: #198754;\n" +
+                "    --danger: #dc3545;\n" +
                 "    --border-color: #dee2e6;\n" +
-                "    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);\n" +
-                "    --radius-md: 12px;\n" +
+                "    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);\n" +
+                "    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);\n" +
+                "    --radius-sm: 6px;\n" +
+                "    --radius-md: 8px;\n" +
+                "    --contrast-bg: #000000;\n" +
+                "    --contrast-text: #ffffff;\n" +
                 "}\n" +
                 "body.dark-theme {\n" +
-                "    --bg-primary: #1a1b1e;\n" +
-                "    --bg-secondary: #25262b;\n" +
-                "    --bg-tertiary: #2c2e33;\n" +
-                "    --text-primary: #e9ecef;\n" +
-                "    --text-secondary: #adb5bd;\n" +
-                "    --border-color: #373a40;\n" +
-                "    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);\n" +
+                "    --bg-primary: #0f172a;\n" +
+                "    --bg-secondary: #1e293b;\n" +
+                "    --bg-tertiary: #334155;\n" +
+                "    --text-primary: #f8fafc;\n" +
+                "    --text-secondary: #94a3b8;\n" +
+                "    --accent-primary: #f8fafc;\n" +
+                "    --accent-secondary: #e2e8f0;\n" +
+                "    --border-color: #334155;\n" +
+                "    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);\n" +
+                "    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);\n" +
+                "    --contrast-bg: #ffffff;\n" +
+                "    --contrast-text: #000000;\n" +
                 "}\n" +
                 "body {\n" +
-                "    font-family: 'Inter', sans-serif;\n" +
+                "    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n" +
                 "    background: var(--bg-primary);\n" +
                 "    color: var(--text-primary);\n" +
-                "    line-height: 1.6;\n" +
-                "    transition: background 0.3s ease;\n" +
+                "    line-height: 1.5;\n" +
+                "    transition: background 0.3s ease, color 0.3s ease;\n" +
                 "}\n" +
                 ".header {\n" +
-                "    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));\n" +
-                "    padding: 2rem;\n" +
-                "    box-shadow: var(--shadow-md);\n" +
+                "    background: var(--bg-secondary);\n" +
+                "    padding: 1.5rem 2rem;\n" +
+                "    border-bottom: 1px solid var(--border-color);\n" +
                 "    position: sticky;\n" +
                 "    top: 0;\n" +
                 "    z-index: 100;\n" +
@@ -380,23 +387,26 @@ public class HtmlReportGenerator {
                 "    align-items: center;\n" +
                 "}\n" +
                 ".header h1 {\n" +
-                "    color: white;\n" +
-                "    font-size: 1.75rem;\n" +
-                "    font-weight: 700;\n" +
+                "    color: var(--text-primary);\n" +
+                "    font-size: 1.5rem;\n" +
+                "    font-weight: 600;\n" +
+                "    letter-spacing: -0.025em;\n" +
                 "}\n" +
                 ".theme-toggle {\n" +
-                "    background: rgba(255,255,255,0.2);\n" +
-                "    border: 2px solid rgba(255,255,255,0.3);\n" +
-                "    color: white;\n" +
-                "    padding: 0.5rem 1rem;\n" +
-                "    border-radius: 8px;\n" +
+                "    background: transparent;\n" +
+                "    border: 1px solid var(--border-color);\n" +
+                "    color: var(--text-primary);\n" +
+                "    padding: 0.5rem;\n" +
+                "    border-radius: var(--radius-sm);\n" +
                 "    cursor: pointer;\n" +
                 "    font-size: 1.25rem;\n" +
-                "    transition: all 0.3s ease;\n" +
+                "    transition: all 0.2s ease;\n" +
+                "    display: flex;\n" +
+                "    align-items: center;\n" +
+                "    justify-content: center;\n" +
                 "}\n" +
                 ".theme-toggle:hover {\n" +
-                "    background: rgba(255,255,255,0.3);\n" +
-                "    transform: scale(1.05);\n" +
+                "    background: var(--bg-tertiary);\n" +
                 "}\n" +
                 ".container {\n" +
                 "    max-width: 1400px;\n" +
@@ -405,44 +415,41 @@ public class HtmlReportGenerator {
                 "}\n" +
                 ".summary-grid {\n" +
                 "    display: grid;\n" +
-                "    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n" +
+                "    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));\n" +
                 "    gap: 1.5rem;\n" +
-                "    margin-bottom: 2rem;\n" +
+                "    margin-bottom: 2.5rem;\n" +
                 "}\n" +
                 ".summary-card {\n" +
                 "    background: var(--bg-secondary);\n" +
                 "    padding: 1.5rem;\n" +
                 "    border-radius: var(--radius-md);\n" +
-                "    box-shadow: var(--shadow-md);\n" +
-                "    display: flex;\n" +
-                "    align-items: center;\n" +
-                "    gap: 1rem;\n" +
-                "    transition: transform 0.2s ease;\n" +
                 "    border: 1px solid var(--border-color);\n" +
-                "}\n" +
-                ".summary-card:hover {\n" +
-                "    transform: translateY(-4px);\n" +
+                "    display: flex;\n" +
+                "    flex-direction: column;\n" +
+                "    gap: 0.5rem;\n" +
                 "}\n" +
                 ".card-icon {\n" +
-                "    font-size: 2.5rem;\n" +
+                "    font-size: 1.5rem;\n" +
+                "    margin-bottom: 0.5rem;\n" +
+                "    color: var(--text-secondary);\n" +
                 "}\n" +
                 ".card-value {\n" +
                 "    font-size: 2rem;\n" +
                 "    font-weight: 700;\n" +
-                "    color: var(--accent-primary);\n" +
+                "    color: var(--text-primary);\n" +
+                "    line-height: 1;\n" +
                 "}\n" +
                 ".card-label {\n" +
                 "    font-size: 0.875rem;\n" +
                 "    color: var(--text-secondary);\n" +
-                "    text-transform: uppercase;\n" +
+                "    font-weight: 500;\n" +
                 "}\n" +
                 ".filters-section {\n" +
                 "    background: var(--bg-secondary);\n" +
                 "    padding: 1.5rem;\n" +
                 "    border-radius: var(--radius-md);\n" +
-                "    box-shadow: var(--shadow-md);\n" +
-                "    margin-bottom: 2rem;\n" +
                 "    border: 1px solid var(--border-color);\n" +
+                "    margin-bottom: 2rem;\n" +
                 "}\n" +
                 ".filters-header {\n" +
                 "    display: flex;\n" +
@@ -457,95 +464,95 @@ public class HtmlReportGenerator {
                 "    gap: 0.75rem;\n" +
                 "}\n" +
                 ".btn-primary, .btn-secondary {\n" +
-                "    padding: 0.625rem 1.25rem;\n" +
-                "    border-radius: 8px;\n" +
+                "    padding: 0.5rem 1rem;\n" +
+                "    border-radius: var(--radius-sm);\n" +
                 "    font-weight: 500;\n" +
                 "    cursor: pointer;\n" +
                 "    transition: all 0.2s ease;\n" +
-                "    border: none;\n" +
                 "    font-size: 0.875rem;\n" +
                 "}\n" +
                 ".btn-primary {\n" +
-                "    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));\n" +
-                "    color: white;\n" +
+                "    background: var(--accent-primary);\n" +
+                "    color: var(--bg-secondary);\n" +
+                "    border: 1px solid var(--accent-primary);\n" +
                 "}\n" +
                 ".btn-primary:hover {\n" +
-                "    transform: translateY(-2px);\n" +
+                "    opacity: 0.9;\n" +
                 "}\n" +
                 ".btn-secondary {\n" +
-                "    background: var(--bg-tertiary);\n" +
+                "    background: transparent;\n" +
                 "    color: var(--text-primary);\n" +
                 "    border: 1px solid var(--border-color);\n" +
                 "}\n" +
+                ".btn-secondary:hover {\n" +
+                "    background: var(--bg-tertiary);\n" +
+                "}\n" +
                 ".filters-grid {\n" +
                 "    display: grid;\n" +
-                "    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n" +
+                "    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));\n" +
                 "    gap: 1rem;\n" +
                 "    margin-bottom: 1rem;\n" +
                 "}\n" +
                 ".filter-group label {\n" +
                 "    display: block;\n" +
-                "    margin-bottom: 0.5rem;\n" +
+                "    margin-bottom: 0.375rem;\n" +
                 "    font-weight: 500;\n" +
                 "    color: var(--text-secondary);\n" +
                 "    font-size: 0.875rem;\n" +
                 "}\n" +
                 ".filter-input, .filter-select {\n" +
                 "    width: 100%;\n" +
-                "    padding: 0.625rem;\n" +
+                "    padding: 0.5rem;\n" +
                 "    border: 1px solid var(--border-color);\n" +
-                "    border-radius: 8px;\n" +
+                "    border-radius: var(--radius-sm);\n" +
                 "    background: var(--bg-primary);\n" +
                 "    color: var(--text-primary);\n" +
                 "    font-size: 0.875rem;\n" +
+                "    transition: border-color 0.2s ease;\n" +
                 "}\n" +
                 ".filter-input:focus, .filter-select:focus {\n" +
                 "    outline: none;\n" +
-                "    border-color: var(--accent-primary);\n" +
+                "    border-color: var(--text-secondary);\n" +
                 "}\n" +
-                ".results-info {\n" +
-                "    padding: 0.75rem;\n" +
-                "    background: var(--bg-tertiary);\n" +
-                "    border-radius: 8px;\n" +
-                "    text-align: center;\n" +
-                "    font-weight: 500;\n" +
-                "    color: var(--text-secondary);\n" +
-                "}\n" +
+
                 ".table-container {\n" +
                 "    background: var(--bg-secondary);\n" +
                 "    border-radius: var(--radius-md);\n" +
-                "    box-shadow: var(--shadow-md);\n" +
-                "    overflow: hidden;\n" +
                 "    border: 1px solid var(--border-color);\n" +
+                "    overflow: hidden;\n" +
                 "}\n" +
                 ".detections-table {\n" +
                 "    width: 100%;\n" +
                 "    border-collapse: collapse;\n" +
+                "    font-size: 0.875rem;\n" +
                 "}\n" +
                 ".detections-table thead {\n" +
-                "    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));\n" +
+                "    background: var(--contrast-bg);\n" +
+                "    border-bottom: 1px solid var(--border-color);\n" +
                 "}\n" +
                 ".detections-table th {\n" +
-                "    padding: 1rem;\n" +
+                "    padding: 0.75rem 1rem;\n" +
                 "    text-align: left;\n" +
-                "    color: white;\n" +
+                "    color: var(--contrast-text);\n" +
                 "    font-weight: 600;\n" +
-                "    font-size: 0.875rem;\n" +
+                "    font-size: 0.75rem;\n" +
                 "    text-transform: uppercase;\n" +
+                "    letter-spacing: 0.05em;\n" +
                 "}\n" +
                 ".detections-table th.sortable {\n" +
                 "    cursor: pointer;\n" +
                 "    user-select: none;\n" +
                 "}\n" +
                 ".detections-table th.sortable:hover {\n" +
-                "    background: rgba(255,255,255,0.1);\n" +
+                "    color: var(--text-primary);\n" +
                 "}\n" +
                 ".detections-table td {\n" +
                 "    padding: 1rem;\n" +
                 "    border-bottom: 1px solid var(--border-color);\n" +
+                "    color: var(--text-primary);\n" +
                 "}\n" +
-                ".detections-table tbody tr {\n" +
-                "    transition: background 0.2s ease;\n" +
+                ".detections-table tbody tr:last-child td {\n" +
+                "    border-bottom: none;\n" +
                 "}\n" +
                 ".detections-table tbody tr:hover {\n" +
                 "    background: var(--bg-tertiary);\n" +
@@ -554,22 +561,22 @@ public class HtmlReportGenerator {
                 "    display: none;\n" +
                 "}\n" +
                 ".file-name {\n" +
-                "    font-weight: 500;\n" +
-                "    color: var(--accent-primary);\n" +
+                "    font-weight: 600;\n" +
+                "    color: var(--text-primary);\n" +
                 "}\n" +
                 ".line-number {\n" +
                 "    text-align: center;\n" +
-                "    font-weight: 600;\n" +
-                "    color: var(--text-secondary);\n" +
                 "    font-family: 'Courier New', monospace;\n" +
+                "    color: var(--text-secondary);\n" +
                 "}\n" +
                 ".keyword {\n" +
                 "    color: var(--danger);\n" +
-                "    font-weight: 600;\n" +
-                "    padding: 0.25rem 0.5rem;\n" +
-                "    background: rgba(255, 107, 107, 0.1);\n" +
+                "    font-weight: 500;\n" +
+                "    padding: 0.125rem 0.375rem;\n" +
+                "    background: rgba(220, 53, 69, 0.1);\n" +
                 "    border-radius: 4px;\n" +
                 "    display: inline-block;\n" +
+                "    font-size: 0.75rem;\n" +
                 "}\n" +
                 ".log-statement {\n" +
                 "    font-family: 'Courier New', monospace;\n" +
@@ -579,28 +586,31 @@ public class HtmlReportGenerator {
                 "    border-radius: 4px;\n" +
                 "    max-width: 600px;\n" +
                 "    overflow-x: auto;\n" +
+                "    color: var(--text-primary);\n" +
                 "}\n" +
                 ".empty-state {\n" +
                 "    text-align: center;\n" +
                 "    padding: 4rem 2rem;\n" +
                 "    background: var(--bg-secondary);\n" +
                 "    border-radius: var(--radius-md);\n" +
-                "    box-shadow: var(--shadow-md);\n" +
+                "    border: 1px solid var(--border-color);\n" +
                 "}\n" +
                 ".empty-icon {\n" +
-                "    font-size: 4rem;\n" +
+                "    font-size: 3rem;\n" +
                 "    margin-bottom: 1rem;\n" +
+                "    color: var(--success);\n" +
                 "}\n" +
                 ".empty-state h2 {\n" +
-                "    color: var(--success);\n" +
+                "    color: var(--text-primary);\n" +
                 "    margin-bottom: 0.5rem;\n" +
+                "    font-size: 1.25rem;\n" +
                 "}\n" +
                 "@media (max-width: 768px) {\n" +
-                "    .header-content { flex-direction: column; gap: 1rem; }\n" +
+                "    .header-content { flex-direction: column; gap: 1rem; align-items: flex-start; }\n" +
                 "    .summary-grid { grid-template-columns: 1fr; }\n" +
                 "    .filters-grid { grid-template-columns: 1fr; }\n" +
                 "    .detections-table { font-size: 0.75rem; }\n" +
-                "    .detections-table td, .detections-table th { padding: 0.5rem; }\n" +
+                "    .detections-table td, .detections-table th { padding: 0.75rem 0.5rem; }\n" +
                 "}\n";
     }
 
@@ -610,6 +620,7 @@ public class HtmlReportGenerator {
      * @param durationMs duration in milliseconds
      * @return formatted duration string
      */
+
     private String formatDuration(long durationMs) {
         if (durationMs < 1000) {
             return durationMs + " ms";

@@ -10,37 +10,46 @@
 :root {
     --bg-primary: #f8f9fa;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #f1f3f5;
+    --bg-tertiary: #e9ecef;
     --text-primary: #212529;
     --text-secondary: #6c757d;
-    --accent-primary: #667eea;
-    --accent-secondary: #764ba2;
-    --success: #51cf66;
-    --danger: #ff6b6b;
+    --accent-primary: #0f172a;
+    --accent-secondary: #334155;
+    --success: #198754;
+    --danger: #dc3545;
     --border-color: #dee2e6;
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-    --radius-md: 12px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --contrast-bg: #000000;
+    --contrast-text: #ffffff;
 }
 body.dark-theme {
-    --bg-primary: #1a1b1e;
-    --bg-secondary: #25262b;
-    --bg-tertiary: #2c2e33;
-    --text-primary: #e9ecef;
-    --text-secondary: #adb5bd;
-    --border-color: #373a40;
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-primary: #f8fafc;
+    --accent-secondary: #e2e8f0;
+    --border-color: #334155;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);
+    --contrast-bg: #ffffff;
+    --contrast-text: #000000;
 }
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
-    line-height: 1.6;
-    transition: background 0.3s ease;
+    line-height: 1.5;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 .header {
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    padding: 2rem;
-    box-shadow: var(--shadow-md);
+    background: var(--bg-secondary);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -53,23 +62,26 @@ body {
     align-items: center;
 }
 .header h1 {
-    color: white;
-    font-size: 1.75rem;
-    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
 }
 .theme-toggle {
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.3);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 1.25rem;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .theme-toggle:hover {
-    background: rgba(255,255,255,0.3);
-    transform: scale(1.05);
+    background: var(--bg-tertiary);
 }
 .container {
     max-width: 1400px;
@@ -78,44 +90,41 @@ body {
 }
 .summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 .summary-card {
     background: var(--bg-secondary);
     padding: 1.5rem;
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: transform 0.2s ease;
     border: 1px solid var(--border-color);
-}
-.summary-card:hover {
-    transform: translateY(-4px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 .card-icon {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
 }
 .card-value {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--accent-primary);
+    color: var(--text-primary);
+    line-height: 1;
 }
 .card-label {
     font-size: 0.875rem;
     color: var(--text-secondary);
-    text-transform: uppercase;
+    font-weight: 500;
 }
 .filters-section {
     background: var(--bg-secondary);
     padding: 1.5rem;
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    margin-bottom: 2rem;
     border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
 }
 .filters-header {
     display: flex;
@@ -130,95 +139,94 @@ body {
     gap: 0.75rem;
 }
 .btn-primary, .btn-secondary {
-    padding: 0.625rem 1.25rem;
-    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
-    border: none;
     font-size: 0.875rem;
 }
 .btn-primary {
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    color: white;
+    background: var(--accent-primary);
+    color: var(--bg-secondary);
+    border: 1px solid var(--accent-primary);
 }
 .btn-primary:hover {
-    transform: translateY(-2px);
+    opacity: 0.9;
 }
 .btn-secondary {
-    background: var(--bg-tertiary);
+    background: transparent;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
 }
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
 .filters-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
     margin-bottom: 1rem;
 }
 .filter-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.375rem;
     font-weight: 500;
     color: var(--text-secondary);
     font-size: 0.875rem;
 }
 .filter-input, .filter-select {
     width: 100%;
-    padding: 0.625rem;
+    padding: 0.5rem;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     background: var(--bg-primary);
     color: var(--text-primary);
     font-size: 0.875rem;
+    transition: border-color 0.2s ease;
 }
 .filter-input:focus, .filter-select:focus {
     outline: none;
-    border-color: var(--accent-primary);
-}
-.results-info {
-    padding: 0.75rem;
-    background: var(--bg-tertiary);
-    border-radius: 8px;
-    text-align: center;
-    font-weight: 500;
-    color: var(--text-secondary);
+    border-color: var(--text-secondary);
 }
 .table-container {
     background: var(--bg-secondary);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
     border: 1px solid var(--border-color);
+    overflow: hidden;
 }
 .detections-table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 0.875rem;
 }
 .detections-table thead {
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    background: var(--contrast-bg);
+    border-bottom: 1px solid var(--border-color);
 }
 .detections-table th {
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     text-align: left;
-    color: white;
+    color: var(--contrast-text);
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 .detections-table th.sortable {
     cursor: pointer;
     user-select: none;
 }
 .detections-table th.sortable:hover {
-    background: rgba(255,255,255,0.1);
+    color: var(--text-primary);
 }
 .detections-table td {
     padding: 1rem;
     border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
-.detections-table tbody tr {
-    transition: background 0.2s ease;
+.detections-table tbody tr:last-child td {
+    border-bottom: none;
 }
 .detections-table tbody tr:hover {
     background: var(--bg-tertiary);
@@ -227,22 +235,22 @@ body {
     display: none;
 }
 .file-name {
-    font-weight: 500;
-    color: var(--accent-primary);
+    font-weight: 600;
+    color: var(--text-primary);
 }
 .line-number {
     text-align: center;
-    font-weight: 600;
-    color: var(--text-secondary);
     font-family: 'Courier New', monospace;
+    color: var(--text-secondary);
 }
 .keyword {
     color: var(--danger);
-    font-weight: 600;
-    padding: 0.25rem 0.5rem;
-    background: rgba(255, 107, 107, 0.1);
+    font-weight: 500;
+    padding: 0.125rem 0.375rem;
+    background: rgba(220, 53, 69, 0.1);
     border-radius: 4px;
     display: inline-block;
+    font-size: 0.75rem;
 }
 .log-statement {
     font-family: 'Courier New', monospace;
@@ -252,28 +260,31 @@ body {
     border-radius: 4px;
     max-width: 600px;
     overflow-x: auto;
+    color: var(--text-primary);
 }
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
     background: var(--bg-secondary);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
 }
 .empty-icon {
-    font-size: 4rem;
+    font-size: 3rem;
     margin-bottom: 1rem;
+    color: var(--success);
 }
 .empty-state h2 {
-    color: var(--success);
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
+    font-size: 1.25rem;
 }
 @media (max-width: 768px) {
-    .header-content { flex-direction: column; gap: 1rem; }
+    .header-content { flex-direction: column; gap: 1rem; align-items: flex-start; }
     .summary-grid { grid-template-columns: 1fr; }
     .filters-grid { grid-template-columns: 1fr; }
     .detections-table { font-size: 0.75rem; }
-    .detections-table td, .detections-table th { padding: 0.5rem; }
+    .detections-table td, .detections-table th { padding: 0.75rem 0.5rem; }
 }
     </style>
 </head>
@@ -289,7 +300,7 @@ body {
             <div class="summary-card">
                 <div class="card-icon">📁</div>
                 <div class="card-content">
-                    <div class="card-value">16</div>
+                    <div class="card-value">15</div>
                     <div class="card-label">Files Scanned</div>
                 </div>
             </div>
@@ -303,14 +314,14 @@ body {
             <div class="summary-card">
                 <div class="card-icon">🎯</div>
                 <div class="card-content">
-                    <div class="card-value">3</div>
+                    <div class="card-value">1</div>
                     <div class="card-label">Affected Files</div>
                 </div>
             </div>
             <div class="summary-card">
                 <div class="card-icon">⏱️</div>
                 <div class="card-content">
-                    <div class="card-value">109 ms</div>
+                    <div class="card-value">122 ms</div>
                     <div class="card-label">Scan Duration</div>
                 </div>
             </div>
@@ -332,22 +343,18 @@ body {
                     <label for="fileFilter">File Name</label>
                     <select id="fileFilter" class="filter-select">
                         <option value="">All Files</option>
-                        <option value="SensitiveDataDetector.java">SensitiveDataDetector.java</option>
                         <option value="SensitiveDataScannerApp.java">SensitiveDataScannerApp.java</option>
-                        <option value="TestExclusion.java">TestExclusion.java</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label for="keywordFilter">Keyword</label>
                     <select id="keywordFilter" class="filter-select">
                         <option value="">All Keywords</option>
-                        <option value="password (in string literal)">password (in string literal)</option>
+                        <option value=".*SSN.* (in string literal)">.*SSN.* (in string literal)</option>
+                        <option value=".*ssn.* (in string literal)">.*ssn.* (in string literal)</option>
                         <option value="ssn (in string literal)">ssn (in string literal)</option>
                     </select>
                 </div>
-            </div>
-            <div class="results-info">
-                <span id="resultsCount">Showing 3 of 3 detections</span>
             </div>
         </div>
         <div class="table-container">
@@ -361,23 +368,23 @@ body {
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <tr data-file="SensitiveDataDetector.java" data-line="200" data-keyword="ssn (in string literal)">
-                        <td class="file-name">SensitiveDataDetector.java</td>
-                        <td class="line-number">200</td>
-                        <td class="keyword">ssn (in string literal)</td>
-                        <td class="log-statement">// This detects cases like: logger.info(&quot;SSN: &quot; + anyVariable) List&lt;String&gt; stringLiterals = extractStringLiterals(statement);</td>
-                    </tr>
                     <tr data-file="SensitiveDataScannerApp.java" data-line="48" data-keyword="ssn (in string literal)">
                         <td class="file-name">SensitiveDataScannerApp.java</td>
                         <td class="line-number">48</td>
                         <td class="keyword">ssn (in string literal)</td>
                         <td class="log-statement">System.out.println(&quot;User SSN: &quot; + outputPath);</td>
                     </tr>
-                    <tr data-file="TestExclusion.java" data-line="13" data-keyword="password (in string literal)">
-                        <td class="file-name">TestExclusion.java</td>
-                        <td class="line-number">13</td>
-                        <td class="keyword">password (in string literal)</td>
-                        <td class="log-statement">System.out.println(&quot;This is a normal log with password = 456&quot;);</td>
+                    <tr data-file="SensitiveDataScannerApp.java" data-line="48" data-keyword=".*SSN.* (in string literal)">
+                        <td class="file-name">SensitiveDataScannerApp.java</td>
+                        <td class="line-number">48</td>
+                        <td class="keyword">.*SSN.* (in string literal)</td>
+                        <td class="log-statement">System.out.println(&quot;User SSN: &quot; + outputPath);</td>
+                    </tr>
+                    <tr data-file="SensitiveDataScannerApp.java" data-line="48" data-keyword=".*ssn.* (in string literal)">
+                        <td class="file-name">SensitiveDataScannerApp.java</td>
+                        <td class="line-number">48</td>
+                        <td class="keyword">.*ssn.* (in string literal)</td>
+                        <td class="log-statement">System.out.println(&quot;User SSN: &quot; + outputPath);</td>
                     </tr>
                 </tbody>
             </table>
@@ -405,7 +412,6 @@ body {
         const resetFilters = document.getElementById('resetFilters');
         const exportCsv = document.getElementById('exportCsv');
         const tableBody = document.getElementById('tableBody');
-        const resultsCount = document.getElementById('resultsCount');
         
         searchBox.addEventListener('input', applyFilters);
         fileFilter.addEventListener('change', applyFilters);
@@ -442,7 +448,6 @@ body {
                 }
             });
             
-            resultsCount.textContent = `Showing ${visibleCount} of ${rows.length} detections`;
         }
         
         // Table sorting
