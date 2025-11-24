@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exclusions>
+    <!-- Exclude common test files or safe logging patterns -->
+    <exclusion type="plain">test-data</exclusion>
+    <exclusion type="plain">mock</exclusion>
+    <exclusion type="plain">//</exclusion>
+    
+    <!-- Regex exclusions -->
+    <exclusion type="regex">.*[Tt]est.*</exclusion>
+    <exclusion type="regex">.*[Ee]xample.*</exclusion>
+</exclusions>

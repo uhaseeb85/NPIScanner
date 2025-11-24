@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scan-directories>
+    <!-- Add one or more directories to scan for Java files -->
+    <directory>./src/main/java</directory>
+    <!-- Uncomment to add more directories -->
+    <!-- <directory>./src/main/resources</directory> -->
+</scan-directories>

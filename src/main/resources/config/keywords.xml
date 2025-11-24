@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keywords>
+    <!-- Plain text keywords for exact matching -->
+    <keyword type="plain">ssn</keyword>
+    <keyword type="plain">socialSecurity</keyword>
+    <keyword type="plain">debitCard</keyword>
+    <keyword type="plain">creditCard</keyword>
+    <keyword type="plain">pin</keyword>
+    <keyword type="plain">dateOfBirth</keyword>
+    <keyword type="plain">dob</keyword>
+    <keyword type="plain">password</keyword>
+    <keyword type="plain">email</keyword>
+    <keyword type="plain">phone</keyword>
+    <keyword type="plain">address</keyword>
+    <keyword type="plain">accountNumber</keyword>
+    
+    <!-- Regex patterns for flexible matching -->
+    <keyword type="regex">.*[Pp]assword.*</keyword>
+    <keyword type="regex">credit[Cc]ard.*</keyword>
+    <keyword type="regex">.*SSN.*</keyword>
+    <keyword type="regex">.*ssn.*</keyword>
+    <keyword type="regex">.*[Pp][Ii][Nn].*</keyword>
+</keywords>
