@@ -21,46 +21,155 @@ import java.util.regex.PatternSyntaxException;
 public class ConfigurationLoader {
 
     /**
-     * Loads the scan configuration from the specified XML file.
+     * Loads the scan configuration from a directory containing multiple XML files.
+     * Expected files: scan-directories.xml, keywords.xml, object-types.xml,
+     * exclusions.xml
      *
-     * @param configFilePath the path to the XML configuration file
+     * @param configDirPath the path to the configuration directory
      * @return a ScanConfiguration object containing the parsed patterns
-     * @throws ConfigurationException if the file is not found, invalid, or contains
-     *                                errors
+     * @throws ConfigurationException if the directory is not found, invalid, or
+     *                                contains errors
      */
-    public ScanConfiguration loadConfiguration(String configFilePath) throws ConfigurationException {
-        if (configFilePath == null || configFilePath.trim().isEmpty()) {
-            throw new ConfigurationException("Configuration file path cannot be null or empty");
+    public ScanConfiguration loadConfiguration(String configDirPath) throws ConfigurationException {
+        if (configDirPath == null || configDirPath.trim().isEmpty()) {
+            throw new ConfigurationException("Configuration directory path cannot be null or empty");
         }
 
-        File configFile = new File(configFilePath);
-        if (!configFile.exists()) {
-            throw new ConfigurationException("Configuration file not found: " + configFilePath);
+        File configDir = new File(configDirPath);
+        if (!configDir.exists()) {
+            throw new ConfigurationException("Configuration directory not found: " + configDirPath);
         }
 
-        if (!configFile.canRead()) {
-            throw new ConfigurationException("Configuration file is not readable: " + configFilePath);
+        if (!configDir.isDirectory()) {
+            throw new ConfigurationException("Configuration path is not a directory: " + configDirPath);
         }
 
+        if (!configDir.canRead()) {
+            throw new ConfigurationException("Configuration directory is not readable: " + configDirPath);
+        }
+
+        // Define expected file names
+        File scanDirFile = new File(configDir, "scan-directories.xml");
+        File keywordsFile = new File(configDir, "keywords.xml");
+        File objectTypesFile = new File(configDir, "object-types.xml");
+        File exclusionsFile = new File(configDir, "exclusions.xml");
+
+        // Load each configuration component
+        List<String> scanDirectories = new ArrayList<>();
+        List<KeywordPattern> patterns = new ArrayList<>();
+        List<KeywordPattern> sensitiveObjectTypes = new ArrayList<>();
+        List<KeywordPattern> exclusions = new ArrayList<>();
+
+        // Load scan directories (optional)
+        if (scanDirFile.exists()) {
+            scanDirectories = loadScanDirectoriesFromFile(scanDirFile);
+        }
+
+        // Load keywords (optional)
+        if (keywordsFile.exists()) {
+            patterns = loadKeywordsFromFile(keywordsFile);
+        }
+
+        // Load object types (optional)
+        if (objectTypesFile.exists()) {
+            sensitiveObjectTypes = loadObjectTypesFromFile(objectTypesFile);
+        }
+
+        // Load exclusions (optional)
+        if (exclusionsFile.exists()) {
+            exclusions = loadExclusionsFromFile(exclusionsFile);
+        }
+
+        return new ScanConfiguration(scanDirectories, patterns, sensitiveObjectTypes, exclusions);
+    }
+
+    /**
+     * Loads scan directories from a standalone XML file.
+     */
+    private List<String> loadScanDirectoriesFromFile(File file) throws ConfigurationException {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(configFile);
+            Document document = builder.parse(file);
             document.getDocumentElement().normalize();
-
-            List<KeywordPattern> patterns = parseKeywords(document);
-            List<KeywordPattern> sensitiveObjectTypes = parseSensitiveObjectTypes(document);
-            List<KeywordPattern> exclusions = parseExclusions(document);
-
-            return new ScanConfiguration(patterns, sensitiveObjectTypes, exclusions);
-
-        } catch (ParserConfigurationException e) {
-            throw new ConfigurationException("Failed to configure XML parser", e);
-        } catch (SAXException e) {
-            throw new ConfigurationException("Invalid XML structure in configuration file: " + e.getMessage(), e);
-        } catch (IOException e) {
-            throw new ConfigurationException("Error reading configuration file: " + configFilePath, e);
+            return parseScanDirectories(document);
+        } catch (Exception e) {
+            throw new ConfigurationException(
+                    "Error loading scan directories from " + file.getName() + ": " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Loads keywords from a standalone XML file.
+     */
+    private List<KeywordPattern> loadKeywordsFromFile(File file) throws ConfigurationException {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(file);
+            document.getDocumentElement().normalize();
+            return parseKeywords(document);
+        } catch (Exception e) {
+            throw new ConfigurationException("Error loading keywords from " + file.getName() + ": " + e.getMessage(),
+                    e);
+        }
+    }
+
+    /**
+     * Loads object types from a standalone XML file.
+     */
+    private List<KeywordPattern> loadObjectTypesFromFile(File file) throws ConfigurationException {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(file);
+            document.getDocumentElement().normalize();
+            return parseSensitiveObjectTypes(document);
+        } catch (Exception e) {
+            throw new ConfigurationException(
+                    "Error loading object types from " + file.getName() + ": " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Loads exclusions from a standalone XML file.
+     */
+    private List<KeywordPattern> loadExclusionsFromFile(File file) throws ConfigurationException {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(file);
+            document.getDocumentElement().normalize();
+            return parseExclusions(document);
+        } catch (Exception e) {
+            throw new ConfigurationException("Error loading exclusions from " + file.getName() + ": " + e.getMessage(),
+                    e);
+        }
+    }
+
+    /**
+     * Parses scan directory elements from the XML document.
+     *
+     * @param xmlDoc the parsed XML document
+     * @return a list of scan directory paths
+     * @throws ConfigurationException if there are errors parsing scan directories
+     */
+    private List<String> parseScanDirectories(Document xmlDoc) throws ConfigurationException {
+        List<String> directories = new ArrayList<>();
+        NodeList directoryNodes = xmlDoc.getElementsByTagName("directory");
+
+        for (int i = 0; i < directoryNodes.getLength(); i++) {
+            Element directoryElement = (Element) directoryNodes.item(i);
+            String directory = directoryElement.getTextContent().trim();
+
+            if (directory.isEmpty()) {
+                throw new ConfigurationException("Empty directory found at position " + i);
+            }
+
+            directories.add(directory);
+        }
+
+        return directories;
     }
 
     /**

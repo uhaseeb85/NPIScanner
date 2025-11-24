@@ -18,46 +18,37 @@ public class SensitiveDataScannerApp {
     // command-line arguments
     private static final boolean USE_HARDCODED_VALUES = true;
 
-    // Hardcoded directory to scan (used when USE_HARDCODED_VALUES = true)
-    private static final String HARDCODED_SCAN_DIRECTORY = "./src/main/java";
-
-    // Hardcoded output HTML filename (used when USE_HARDCODED_VALUES = true)
-    private static final String HARDCODED_OUTPUT_FILENAME = "scan-report.html";
-
-    // Hardcoded config file path (used when USE_HARDCODED_VALUES = true)
-    private static final String HARDCODED_CONFIG_PATH = "./src/main/resources/sample-config.xml";
+    // Hardcoded config directory path (used when USE_HARDCODED_VALUES = true)
+    private static final String HARDCODED_CONFIG_PATH = "./src/main/resources/config";
     // =============================================
 
-    private static final int MIN_ARGS = 2;
-    private static final int MAX_ARGS = 3;
+    private static final int MIN_ARGS = 1;
+    private static final int MAX_ARGS = 2;
 
     public static void main(String[] args) {
         SensitiveDataScannerApp app = new SensitiveDataScannerApp();
 
         try {
-            String folderPath;
             String configPath;
             String outputPath;
 
             if (USE_HARDCODED_VALUES) {
                 // Use hardcoded values
                 System.out.println("Using hardcoded configuration values...");
-                folderPath = HARDCODED_SCAN_DIRECTORY;
                 configPath = HARDCODED_CONFIG_PATH;
-                outputPath = HARDCODED_OUTPUT_FILENAME;
-                System.out.println("User SSN: " + outputPath);
+                outputPath = generateDefaultOutputPath();
+                System.out.println("Output file: " + outputPath);
 
                 // Validate hardcoded paths
-                app.validatePaths(folderPath, configPath, outputPath);
+                app.validatePaths(configPath, outputPath);
             } else {
                 // Use command-line arguments
                 app.validateArguments(args);
-                folderPath = args[0];
-                configPath = args[1];
-                outputPath = args.length > 2 ? args[2] : generateDefaultOutputPath();
+                configPath = args[0];
+                outputPath = args.length > 1 ? args[1] : generateDefaultOutputPath();
             }
 
-            app.executeScan(folderPath, configPath, outputPath);
+            app.executeScan(configPath, outputPath);
 
             System.out.println("Scan completed successfully!");
             System.out.println("Report generated at: " + outputPath);
@@ -90,46 +81,27 @@ public class SensitiveDataScannerApp {
     /**
      * Validates hardcoded paths when USE_HARDCODED_VALUES is true.
      * 
-     * @param folderPath Path to the folder to scan
-     * @param configPath Path to the configuration file
+     * @param configPath Path to the configuration directory
      * @param outputPath Path for the output report
      * @throws IllegalArgumentException if paths are invalid
      */
-    void validatePaths(String folderPath, String configPath, String outputPath) {
-        // Validate folder path
-        if (folderPath == null || folderPath.trim().isEmpty()) {
-            throw new IllegalArgumentException("Folder path cannot be empty");
-        }
-
-        File folder = new File(folderPath);
-        if (!folder.exists()) {
-            throw new IllegalArgumentException("Folder does not exist: " + folderPath);
-        }
-
-        if (!folder.isDirectory()) {
-            throw new IllegalArgumentException("Path is not a directory: " + folderPath);
-        }
-
-        if (!folder.canRead()) {
-            throw new IllegalArgumentException("Folder is not readable: " + folderPath);
-        }
-
+    void validatePaths(String configPath, String outputPath) {
         // Validate config path
         if (configPath == null || configPath.trim().isEmpty()) {
-            throw new IllegalArgumentException("Configuration file path cannot be empty");
+            throw new IllegalArgumentException("Configuration directory path cannot be empty");
         }
 
-        File configFile = new File(configPath);
-        if (!configFile.exists()) {
-            throw new IllegalArgumentException("Configuration file does not exist: " + configPath);
+        File configDir = new File(configPath);
+        if (!configDir.exists()) {
+            throw new IllegalArgumentException("Configuration directory does not exist: " + configPath);
         }
 
-        if (!configFile.isFile()) {
-            throw new IllegalArgumentException("Configuration path is not a file: " + configPath);
+        if (!configDir.isDirectory()) {
+            throw new IllegalArgumentException("Configuration path is not a directory: " + configPath);
         }
 
-        if (!configFile.canRead()) {
-            throw new IllegalArgumentException("Configuration file is not readable: " + configPath);
+        if (!configDir.canRead()) {
+            throw new IllegalArgumentException("Configuration directory is not readable: " + configPath);
         }
 
         // Validate output path
@@ -141,7 +113,9 @@ public class SensitiveDataScannerApp {
         File outputDir = outputFile.getParentFile();
 
         if (outputDir != null && !outputDir.exists()) {
-            throw new IllegalArgumentException("Output directory does not exist: " + outputDir.getAbsolutePath());
+            if (!outputDir.mkdirs()) {
+                throw new IllegalArgumentException("Failed to create output directory: " + outputDir.getAbsolutePath());
+            }
         }
     }
 
@@ -154,52 +128,33 @@ public class SensitiveDataScannerApp {
     void validateArguments(String[] args) {
         if (args == null || args.length < MIN_ARGS || args.length > MAX_ARGS) {
             throw new IllegalArgumentException(
-                    "Invalid number of arguments. Expected 2-3 arguments, got " +
+                    "Invalid number of arguments. Expected 1-2 arguments, got " +
                             (args == null ? 0 : args.length));
         }
 
-        String folderPath = args[0];
-        String configPath = args[1];
-
-        // Validate folder path
-        if (folderPath == null || folderPath.trim().isEmpty()) {
-            throw new IllegalArgumentException("Folder path cannot be empty");
-        }
-
-        File folder = new File(folderPath);
-        if (!folder.exists()) {
-            throw new IllegalArgumentException("Folder does not exist: " + folderPath);
-        }
-
-        if (!folder.isDirectory()) {
-            throw new IllegalArgumentException("Path is not a directory: " + folderPath);
-        }
-
-        if (!folder.canRead()) {
-            throw new IllegalArgumentException("Folder is not readable: " + folderPath);
-        }
+        String configPath = args[0];
 
         // Validate config path
         if (configPath == null || configPath.trim().isEmpty()) {
-            throw new IllegalArgumentException("Configuration file path cannot be empty");
+            throw new IllegalArgumentException("Configuration directory path cannot be empty");
         }
 
-        File configFile = new File(configPath);
-        if (!configFile.exists()) {
-            throw new IllegalArgumentException("Configuration file does not exist: " + configPath);
+        File configDir = new File(configPath);
+        if (!configDir.exists()) {
+            throw new IllegalArgumentException("Configuration directory does not exist: " + configPath);
         }
 
-        if (!configFile.isFile()) {
-            throw new IllegalArgumentException("Configuration path is not a file: " + configPath);
+        if (!configDir.isDirectory()) {
+            throw new IllegalArgumentException("Configuration path is not a directory: " + configPath);
         }
 
-        if (!configFile.canRead()) {
-            throw new IllegalArgumentException("Configuration file is not readable: " + configPath);
+        if (!configDir.canRead()) {
+            throw new IllegalArgumentException("Configuration directory is not readable: " + configPath);
         }
 
         // Validate output path if provided
-        if (args.length > 2) {
-            String outputPath = args[2];
+        if (args.length > 1) {
+            String outputPath = args[1];
             if (outputPath == null || outputPath.trim().isEmpty()) {
                 throw new IllegalArgumentException("Output path cannot be empty");
             }
@@ -208,7 +163,10 @@ public class SensitiveDataScannerApp {
             File outputDir = outputFile.getParentFile();
 
             if (outputDir != null && !outputDir.exists()) {
-                throw new IllegalArgumentException("Output directory does not exist: " + outputDir.getAbsolutePath());
+                if (!outputDir.mkdirs()) {
+                    throw new IllegalArgumentException(
+                            "Failed to create output directory: " + outputDir.getAbsolutePath());
+                }
             }
         }
     }
@@ -216,14 +174,13 @@ public class SensitiveDataScannerApp {
     /**
      * Executes the complete scanning workflow.
      * 
-     * @param folderPath Path to the folder to scan
      * @param configPath Path to the configuration file
      * @param outputPath Path for the output report
      * @throws ConfigurationException if configuration loading fails
      * @throws ScanException          if scanning fails
      * @throws ReportException        if report generation fails
      */
-    void executeScan(String folderPath, String configPath, String outputPath)
+    void executeScan(String configPath, String outputPath)
             throws ConfigurationException, ScanException, ReportException {
 
         long startTime = System.currentTimeMillis();
@@ -235,13 +192,21 @@ public class SensitiveDataScannerApp {
         System.out.println("Configuration loaded successfully.");
 
         // Step 2: Scan for Java files
-        System.out.println("Scanning directory: " + folderPath);
         JavaFileScanner fileScanner = new JavaFileScanner();
-        List<Path> javaFiles;
-        try {
-            javaFiles = fileScanner.scanDirectory(folderPath);
-        } catch (Exception e) {
-            throw new ScanException("Failed to scan directory: " + e.getMessage(), e);
+        List<Path> javaFiles = new ArrayList<>();
+
+        List<String> scanDirectories = config.getScanDirectories();
+        if (scanDirectories.isEmpty()) {
+            System.out.println("Warning: No scan directories specified in configuration.");
+        }
+
+        for (String dir : scanDirectories) {
+            System.out.println("Scanning directory: " + dir);
+            try {
+                javaFiles.addAll(fileScanner.scanDirectory(dir));
+            } catch (Exception e) {
+                throw new ScanException("Failed to scan directory " + dir + ": " + e.getMessage(), e);
+            }
         }
         System.out.println("Found " + javaFiles.size() + " Java files.");
 
@@ -296,17 +261,17 @@ public class SensitiveDataScannerApp {
     private static void displayUsage() {
         System.out.println();
         System.out
-                .println("Usage: java -jar sensitive-data-scanner.jar <folder-path> <config-file-path> [output-path]");
+                .println("Usage: java -jar sensitive-data-scanner.jar <config-directory-path> [output-path]");
         System.out.println();
         System.out.println("Arguments:");
-        System.out.println("  folder-path      : Path to the folder containing Java source files to scan (required)");
-        System.out.println("  config-file-path : Path to the XML configuration file (required)");
-        System.out.println("  output-path      : Path for the output HTML report (optional)");
         System.out.println(
-                "                     If not provided, a timestamped report will be generated in the current directory");
+                "  config-directory-path : Path to the directory containing XML configuration files (required)");
+        System.out.println("  output-path           : Path for the output HTML report (optional)");
+        System.out.println(
+                "                          If not provided, a timestamped report will be generated in the current directory");
         System.out.println();
         System.out.println("Example:");
-        System.out.println("  java -jar sensitive-data-scanner.jar ./src/main/java config.xml report.html");
+        System.out.println("  java -jar sensitive-data-scanner.jar ./src/main/resources/config report.html");
         System.out.println();
     }
 
@@ -318,6 +283,6 @@ public class SensitiveDataScannerApp {
     private static String generateDefaultOutputPath() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
         String timestamp = dateFormat.format(new Date());
-        return "scan-report-" + timestamp + ".html";
+        return "output/scan-report-" + timestamp + ".html";
     }
 }

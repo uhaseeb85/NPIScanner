@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,24 +24,24 @@ class SensitiveDataScannerAppTest {
 
     @Test
     void testValidateArguments_WithValidArguments() throws IOException {
-        // Create temporary folder and config file
-        Path configFile = tempDir.resolve("config.xml");
-        Files.writeString(configFile, "<?xml version=\"1.0\"?><scan-configuration></scan-configuration>");
+        // Create config directory
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
 
-        String[] args = {tempDir.toString(), configFile.toString()};
+        String[] args = { configDir.toString() };
 
         assertDoesNotThrow(() -> app.validateArguments(args));
     }
 
     @Test
     void testValidateArguments_WithValidArgumentsAndOutputPath() throws IOException {
-        // Create temporary folder and config file
-        Path configFile = tempDir.resolve("config.xml");
-        Files.writeString(configFile, "<?xml version=\"1.0\"?><scan-configuration></scan-configuration>");
-        
+        // Create config directory
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
+
         String outputPath = tempDir.resolve("output.html").toString();
 
-        String[] args = {tempDir.toString(), configFile.toString(), outputPath};
+        String[] args = { configDir.toString(), outputPath };
 
         assertDoesNotThrow(() -> app.validateArguments(args));
     }
@@ -50,271 +49,210 @@ class SensitiveDataScannerAppTest {
     @Test
     void testValidateArguments_WithNullArgs() {
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(null)
-        );
+                IllegalArgumentException.class,
+                () -> app.validateArguments(null));
 
         assertTrue(exception.getMessage().contains("Invalid number of arguments"));
     }
 
     @Test
     void testValidateArguments_WithTooFewArguments() {
-        String[] args = {"only-one-arg"};
+        String[] args = {};
 
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
+                IllegalArgumentException.class,
+                () -> app.validateArguments(args));
 
         assertTrue(exception.getMessage().contains("Invalid number of arguments"));
-        assertTrue(exception.getMessage().contains("got 1"));
+        assertTrue(exception.getMessage().contains("got 0"));
     }
 
     @Test
     void testValidateArguments_WithTooManyArguments() throws IOException {
-        Path configFile = tempDir.resolve("config.xml");
-        Files.writeString(configFile, "<?xml version=\"1.0\"?><scan-configuration></scan-configuration>");
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
 
-        String[] args = {tempDir.toString(), configFile.toString(), "output.html", "extra-arg"};
+        String[] args = { configDir.toString(), "output.html", "extra-arg" };
 
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
+                IllegalArgumentException.class,
+                () -> app.validateArguments(args));
 
         assertTrue(exception.getMessage().contains("Invalid number of arguments"));
-        assertTrue(exception.getMessage().contains("got 4"));
-    }
-
-    @Test
-    void testValidateArguments_WithEmptyFolderPath() throws IOException {
-        Path configFile = tempDir.resolve("config.xml");
-        Files.writeString(configFile, "<?xml version=\"1.0\"?><scan-configuration></scan-configuration>");
-
-        String[] args = {"", configFile.toString()};
-
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
-
-        assertTrue(exception.getMessage().contains("Folder path cannot be empty"));
-    }
-
-    @Test
-    void testValidateArguments_WithNonExistentFolder() throws IOException {
-        Path configFile = tempDir.resolve("config.xml");
-        Files.writeString(configFile, "<?xml version=\"1.0\"?><scan-configuration></scan-configuration>");
-
-        String nonExistentFolder = tempDir.resolve("non-existent-folder").toString();
-        String[] args = {nonExistentFolder, configFile.toString()};
-
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
-
-        assertTrue(exception.getMessage().contains("Folder does not exist"));
-    }
-
-    @Test
-    void testValidateArguments_WithFileInsteadOfFolder() throws IOException {
-        Path configFile = tempDir.resolve("config.xml");
-        Files.writeString(configFile, "<?xml version=\"1.0\"?><scan-configuration></scan-configuration>");
-        
-        Path regularFile = tempDir.resolve("not-a-folder.txt");
-        Files.writeString(regularFile, "content");
-
-        String[] args = {regularFile.toString(), configFile.toString()};
-
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
-
-        assertTrue(exception.getMessage().contains("Path is not a directory"));
+        assertTrue(exception.getMessage().contains("got 3"));
     }
 
     @Test
     void testValidateArguments_WithEmptyConfigPath() {
-        String[] args = {tempDir.toString(), ""};
+        String[] args = { "" };
 
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
+                IllegalArgumentException.class,
+                () -> app.validateArguments(args));
 
-        assertTrue(exception.getMessage().contains("Configuration file path cannot be empty"));
+        assertTrue(exception.getMessage().contains("Configuration directory path cannot be empty"));
     }
 
     @Test
-    void testValidateArguments_WithNonExistentConfigFile() {
-        String nonExistentConfig = tempDir.resolve("non-existent-config.xml").toString();
-        String[] args = {tempDir.toString(), nonExistentConfig};
+    void testValidateArguments_WithNonExistentConfigDir() {
+        String nonExistentConfig = tempDir.resolve("non-existent-config").toString();
+        String[] args = { nonExistentConfig };
 
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
+                IllegalArgumentException.class,
+                () -> app.validateArguments(args));
 
-        assertTrue(exception.getMessage().contains("Configuration file does not exist"));
+        assertTrue(exception.getMessage().contains("Configuration directory does not exist"));
     }
 
     @Test
-    void testValidateArguments_WithDirectoryInsteadOfConfigFile() throws IOException {
-        Path configDir = tempDir.resolve("config-dir");
-        Files.createDirectory(configDir);
+    void testValidateArguments_WithFileInsteadOfConfigDir() throws IOException {
+        Path configFile = tempDir.resolve("config.xml");
+        Files.writeString(configFile, "content");
 
-        String[] args = {tempDir.toString(), configDir.toString()};
+        String[] args = { configFile.toString() };
 
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
+                IllegalArgumentException.class,
+                () -> app.validateArguments(args));
 
-        assertTrue(exception.getMessage().contains("Configuration path is not a file"));
+        assertTrue(exception.getMessage().contains("Configuration path is not a directory"));
     }
 
     @Test
     void testValidateArguments_WithEmptyOutputPath() throws IOException {
-        Path configFile = tempDir.resolve("config.xml");
-        Files.writeString(configFile, "<?xml version=\"1.0\"?><scan-configuration></scan-configuration>");
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
 
-        String[] args = {tempDir.toString(), configFile.toString(), ""};
+        String[] args = { configDir.toString(), "" };
 
         IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
+                IllegalArgumentException.class,
+                () -> app.validateArguments(args));
 
         assertTrue(exception.getMessage().contains("Output path cannot be empty"));
     }
 
     @Test
     void testValidateArguments_WithNonExistentOutputDirectory() throws IOException {
-        Path configFile = tempDir.resolve("config.xml");
-        Files.writeString(configFile, "<?xml version=\"1.0\"?><scan-configuration></scan-configuration>");
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
 
         String outputPath = tempDir.resolve("non-existent-dir").resolve("output.html").toString();
-        String[] args = {tempDir.toString(), configFile.toString(), outputPath};
+        String[] args = { configDir.toString(), outputPath };
 
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> app.validateArguments(args)
-        );
-
-        assertTrue(exception.getMessage().contains("Output directory does not exist"));
+        // Should not throw exception anymore - directory will be created automatically
+        assertDoesNotThrow(() -> app.validateArguments(args));
     }
 
     @Test
     void testValidateArguments_WithOutputPathInCurrentDirectory() throws IOException {
-        Path configFile = tempDir.resolve("config.xml");
-        Files.writeString(configFile, "<?xml version=\"1.0\"?><scan-configuration></scan-configuration>");
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
 
         // Output path without parent directory (current directory)
-        String[] args = {tempDir.toString(), configFile.toString(), "output.html"};
+        String[] args = { configDir.toString(), "output.html" };
 
         assertDoesNotThrow(() -> app.validateArguments(args));
     }
 
     @Test
     void testExecuteScan_WithConfigurationException() throws IOException {
+        // Create config directory
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
+
         // Create invalid config file
-        Path configFile = tempDir.resolve("invalid-config.xml");
+        Path configFile = configDir.resolve("scan-directories.xml");
         Files.writeString(configFile, "invalid xml content");
 
-        Path srcDir = tempDir.resolve("src");
-        Files.createDirectory(srcDir);
-        
         Path outputFile = tempDir.resolve("report.html");
 
         // Should throw ConfigurationException
         assertThrows(ConfigurationException.class, () -> {
-            app.executeScan(srcDir.toString(), configFile.toString(), outputFile.toString());
+            app.executeScan(configDir.toString(), outputFile.toString());
         });
     }
 
     @Test
     void testExecuteScan_WithScanException() throws IOException {
-        // Create valid config file
-        Path configFile = tempDir.resolve("config.xml");
+        // Create valid config directory
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
+
+        // Create valid config file but with non-existent directory
+        Path nonExistentDir = tempDir.resolve("non-existent");
+        Path configFile = configDir.resolve("scan-directories.xml");
         String configContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<scan-configuration>\n" +
-            "    <keywords>\n" +
-            "        <keyword type=\"plain\">ssn</keyword>\n" +
-            "    </keywords>\n" +
-            "    <sensitive-object-types>\n" +
-            "    </sensitive-object-types>\n" +
-            "</scan-configuration>";
+                "<scan-directories>\n" +
+                "    <directory>" + nonExistentDir.toString() + "</directory>\n" +
+                "</scan-directories>";
         Files.writeString(configFile, configContent);
 
-        // Use non-existent directory
-        Path nonExistentDir = tempDir.resolve("non-existent");
         Path outputFile = tempDir.resolve("report.html");
 
-        // Should throw ScanException
+        // Should throw ScanException for non-existent directory
         assertThrows(ScanException.class, () -> {
-            app.executeScan(nonExistentDir.toString(), configFile.toString(), outputFile.toString());
+            app.executeScan(configDir.toString(), outputFile.toString());
         });
     }
 
     @Test
     void testExecuteScan_WithReportException() throws IOException {
-        // Create valid config file
-        Path configFile = tempDir.resolve("config.xml");
-        String configContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<scan-configuration>\n" +
-            "    <keywords>\n" +
-            "        <keyword type=\"plain\">ssn</keyword>\n" +
-            "    </keywords>\n" +
-            "    <sensitive-object-types>\n" +
-            "    </sensitive-object-types>\n" +
-            "</scan-configuration>";
-        Files.writeString(configFile, configContent);
-
         // Create source directory
         Path srcDir = tempDir.resolve("src");
         Files.createDirectory(srcDir);
 
-        // Use invalid output path (directory that doesn't exist and can't be created)
-        // On Windows, we can use an invalid path like "Z:\\non-existent\\report.html"
-        // But this might not work on all systems, so let's use a read-only directory approach
-        
+        // Create valid config directory
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
+
+        Path configFile = configDir.resolve("scan-directories.xml");
+        String configContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<scan-directories>\n" +
+                "    <directory>" + srcDir.toString() + "</directory>\n" +
+                "</scan-directories>";
+        Files.writeString(configFile, configContent);
+
         // Create a file where we want to create a directory
         Path blockingFile = tempDir.resolve("blocking");
         Files.writeString(blockingFile, "content");
-        
-        // Try to create output in a path that requires creating a directory where a file exists
+
+        // Try to create output in a path that requires creating a directory where a
+        // file exists
         String invalidOutputPath = blockingFile.toString() + "\\report.html";
 
         // Should throw ReportException
         assertThrows(ReportException.class, () -> {
-            app.executeScan(srcDir.toString(), configFile.toString(), invalidOutputPath);
+            app.executeScan(configDir.toString(), invalidOutputPath);
         });
     }
 
     @Test
     void testExecuteScan_GracefulHandlingOfFileErrors() throws Exception {
-        // Create valid config file
-        Path configFile = tempDir.resolve("config.xml");
-        String configContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<scan-configuration>\n" +
-            "    <keywords>\n" +
-            "        <keyword type=\"plain\">ssn</keyword>\n" +
-            "    </keywords>\n" +
-            "    <sensitive-object-types>\n" +
-            "    </sensitive-object-types>\n" +
-            "</scan-configuration>";
-        Files.writeString(configFile, configContent);
-
         // Create source directory with multiple files
         Path srcDir = tempDir.resolve("src");
         Files.createDirectory(srcDir);
-        
+
+        // Create valid config directory
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
+
+        Path configFile = configDir.resolve("scan-directories.xml");
+        String configContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<scan-directories>\n" +
+                "    <directory>" + srcDir.toString() + "</directory>\n" +
+                "</scan-directories>";
+        Files.writeString(configFile, configContent);
+
+        // Also create keywords.xml
+        Path keywordsFile = configDir.resolve("keywords.xml");
+        Files.writeString(keywordsFile, "<keywords><keyword type=\"plain\">ssn</keyword></keywords>");
+
         // Create a valid Java file
         Path validFile = srcDir.resolve("Valid.java");
         Files.writeString(validFile, "public class Valid { void log() { logger.info(\"SSN: \" + ssn); } }");
-        
+
         // Create another valid Java file
         Path anotherValidFile = srcDir.resolve("Another.java");
         Files.writeString(anotherValidFile, "public class Another { void log() { logger.debug(\"Data: \" + data); } }");
@@ -323,7 +261,7 @@ class SensitiveDataScannerAppTest {
 
         // Should complete successfully even if one file has issues
         assertDoesNotThrow(() -> {
-            app.executeScan(srcDir.toString(), configFile.toString(), outputFile.toString());
+            app.executeScan(configDir.toString(), outputFile.toString());
         });
 
         // Verify report was created
@@ -332,35 +270,40 @@ class SensitiveDataScannerAppTest {
 
     @Test
     void testExecuteScan_WithEmptyDirectory() throws Exception {
-        // Create valid config file
-        Path configFile = tempDir.resolve("config.xml");
-        String configContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<scan-configuration>\n" +
-            "    <keywords>\n" +
-            "        <keyword type=\"plain\">ssn</keyword>\n" +
-            "    </keywords>\n" +
-            "    <sensitive-object-types>\n" +
-            "    </sensitive-object-types>\n" +
-            "</scan-configuration>";
-        Files.writeString(configFile, configContent);
-
         // Create empty source directory
         Path srcDir = tempDir.resolve("src");
         Files.createDirectory(srcDir);
 
-        Path outputFile = tempDir.resolve("report.html");
+        // Create valid config directory
+        Path configDir = tempDir.resolve("config");
+        Files.createDirectory(configDir);
+
+        Path configFile = configDir.resolve("scan-directories.xml");
+        String configContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<scan-directories>\n" +
+                "    <directory>" + srcDir.toString() + "</directory>\n" +
+                "</scan-directories>";
+        Files.writeString(configFile, configContent);
+
+        // Also create keywords.xml
+        Path keywordsFile = configDir.resolve("keywords.xml");
+        Files.writeString(keywordsFile, "<keywords><keyword type=\"plain\">ssn</keyword></keywords>");
+
+        Path outputDir = tempDir.resolve("output");
+        Files.createDirectory(outputDir);
+        Path outputFile = outputDir.resolve("report.html");
 
         // Should complete successfully with empty directory
         assertDoesNotThrow(() -> {
-            app.executeScan(srcDir.toString(), configFile.toString(), outputFile.toString());
+            app.executeScan(configDir.toString(), outputFile.toString());
         });
 
         // Verify report was created
         assertTrue(Files.exists(outputFile));
-        
+
         // Verify report shows 0 files scanned
         String reportContent = Files.readString(outputFile);
-        assertTrue(reportContent.contains("Total Files Scanned"));
+        assertTrue(reportContent.contains("Files Scanned"));
         assertTrue(reportContent.contains("0"));
     }
 }

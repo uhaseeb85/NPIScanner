@@ -1,362 +1,389 @@
 # Sensitive Data Scanner
 
-A Java-based command-line utility that scans Java codebases to detect sensitive information being logged. The tool analyzes Java source files to identify log statements that may expose sensitive data such as SSN, credit card numbers, passwords, and other configurable sensitive keywords.
+A powerful, configurable Java command-line utility designed to detect sensitive information leaks in log statements. It performs a deep scan of your Java codebase to identify potential exposure of PII (Personally Identifiable Information), credentials, and other sensitive data before it reaches production logs.
 
-## Features
+## 🚀 Quick Start
 
-- Configurable keyword detection via XML (supports both plain text and regex patterns)
-- Recursive scanning of Java source directories
-- Detection of multiple logging patterns:
-  - Logger-based logging (logger.info, log.debug, etc.)
-  - System.out.println() and System.err.println() statements
-  - Variable names containing sensitive keywords
-  - Method calls with sensitive names (e.g., `getSSN()`, `card.getNumber()`)
-  - StringBuilder/StringBuffer patterns (single-line and multi-line)
-  - String concatenation with sensitive data
-  - String.join() and StringJoiner patterns
-  - Direct logging of sensitive object types (request, response, etc.)
-- Smart filtering to reduce false positives:
-  - Ignores hardcoded string literals
-  - Filters out method signatures and parameter definitions
-- HTML report generation with detailed findings
-- Summary statistics (files scanned, detections found, scan duration)
+Get up and running in minutes!
 
-## Requirements
+1. **Clone the Repository**
+   ```bash
+   git clone <repository-url>
+   cd NPIScanner
+   ```
 
-- Java 8 or higher
-- Maven 3.6 or higher
+2. **Build the Project**
+   ```bash
+   mvn clean package
+   ```
 
-## Building the Project
+3. **Run the Scanner**
+   
+   **Option A: Using Hardcoded Configuration (Default)**
+   ```bash
+   java -jar target/sensitive-data-scanner-1.0.0.jar
+   ```
+   
+   **Option B: Using Command-Line Arguments**
+   ```bash
+   java -jar target/sensitive-data-scanner-1.0.0.jar ./src/main/resources/config
+   ```
+   
+   **Option C: Specify Custom Output Path**
+   ```bash
+   java -jar target/sensitive-data-scanner-1.0.0.jar ./src/main/resources/config ./custom-output/report.html
+   ```
 
-Clone the repository and build using Maven:
+4. **View the Report**
+   Open the generated report in your browser:
+   - Default location: `output/scan-report-{timestamp}.html`
+   - Custom location: As specified in command-line arguments
 
-```bash
-mvn clean package
+---
+
+## ✨ Key Features
+
+- **Deep Code Analysis**: Goes beyond simple grep. It understands Java syntax to detect:
+  - `logger.info()`, `debug()`, `error()`, etc.
+  - `System.out.println()` and `System.err.println()`
+  - String concatenation (`"SSN: " + ssn`)
+  - `StringBuilder` and `StringBuffer` chains
+  - `String.join()` and `StringJoiner` usage
+  
+- **Smart Detection Engine**:
+  - **Variable Analysis**: Flags variables with sensitive names (e.g., `String password`)
+  - **Method Call Analysis**: Flags calls to sensitive methods (e.g., `user.getSSN()`)
+  - **Object Logging**: Detects when entire sensitive objects are logged (e.g., `logger.info(request)`)
+  
+- **Intelligent Filtering**:
+  - **Exclusion Filters**: Ignore test files, mocks, or specific paths
+  - **False Positive Reduction**: Automatically ignores hardcoded string literals and method signatures
+  
+- **Rich Reporting**: Generates a sleek, interactive HTML report with:
+  - Dark/Light mode support
+  - Sortable and filterable tables
+  - Export to CSV functionality
+  - Responsive design
+
+---
+
+## 🛠️ Configuration
+
+The scanner uses a **directory-based configuration** approach with separate XML files for different configuration aspects.
+
+### Configuration Directory Structure
+
+```
+config/
+├── scan-directories.xml    # Directories to scan
+├── keywords.xml            # Sensitive keywords to detect
+├── object-types.xml        # Sensitive object types
+└── exclusions.xml          # Patterns to exclude
 ```
 
-This will create an executable JAR file at `target/sensitive-data-scanner.jar`.
+### 1. Scan Directories (`scan-directories.xml`)
 
-## Running Tests
-
-Run all unit and integration tests:
-
-```bash
-mvn test
-```
-
-## Usage
-
-### Option 1: Hardcoded Configuration (No Command-Line Arguments)
-
-For convenience during development or repeated scans, you can hardcode the scan directory and output filename directly in the source code.
-
-Edit `src/main/java/com/scanner/SensitiveDataScannerApp.java` and modify these constants:
-
-```java
-// Set to true to use hardcoded values
-private static final boolean USE_HARDCODED_VALUES = true;
-
-// Hardcoded directory to scan
-private static final String HARDCODED_SCAN_DIRECTORY = "./src/main/java";
-
-// Hardcoded output HTML filename
-private static final String HARDCODED_OUTPUT_FILENAME = "scan-report.html";
-
-// Hardcoded config file path
-private static final String HARDCODED_CONFIG_PATH = "./src/main/resources/sample-config.xml";
-```
-
-Then rebuild and run without arguments:
-
-```bash
-mvn clean package
-java -jar target/sensitive-data-scanner.jar
-```
-
-### Option 2: Command-Line Arguments
-
-```bash
-java -jar target/sensitive-data-scanner.jar <folder-path> <config-file-path> [output-path]
-```
-
-### Arguments
-
-- `<folder-path>` (required): Path to the root directory containing Java source files to scan
-- `<config-file-path>` (required): Path to the XML configuration file defining sensitive keywords
-- `[output-path]` (optional): Directory where the HTML report will be saved (defaults to current directory)
-
-### Examples
-
-Scan a project with default output location:
-
-```bash
-java -jar target/sensitive-data-scanner.jar ./src/main/java ./config/scan-config.xml
-```
-
-Scan with custom output directory:
-
-```bash
-java -jar target/sensitive-data-scanner.jar ./src/main/java ./config/scan-config.xml ./reports
-```
-
-Using the sample configuration:
-
-```bash
-java -jar target/sensitive-data-scanner.jar ./src/main/java ./src/main/resources/sample-config.xml
-```
-
-## Configuration
-
-### XML Configuration Format
-
-The scanner uses an XML configuration file to define sensitive keywords and object types to detect.
+Defines which directories to scan for Java files:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<scan-configuration>
-    <keywords>
-        <!-- Plain text keywords (case-sensitive matching) -->
-        <keyword type="plain">ssn</keyword>
-        <keyword type="plain">socialSecurity</keyword>
-        <keyword type="plain">password</keyword>
-        <keyword type="plain">creditCard</keyword>
-        <keyword type="plain">pin</keyword>
-        
-        <!-- Regex patterns for flexible matching -->
-        <keyword type="regex">.*[Pp]assword.*</keyword>
-        <keyword type="regex">credit[Cc]ard.*</keyword>
-        <keyword type="regex">.*SSN.*</keyword>
-    </keywords>
-    
-    <sensitive-object-types>
-        <!-- Object types that should not be logged directly -->
-        <object-type type="plain">request</object-type>
-        <object-type type="plain">response</object-type>
-        <object-type type="plain">httpResponse</object-type>
-        <object-type type="plain">requestBody</object-type>
-        
-        <!-- Regex patterns for object types -->
-        <object-type type="regex">.*Request</object-type>
-        <object-type type="regex">.*Response</object-type>
-    </sensitive-object-types>
-</scan-configuration>
+<scan-directories>
+    <directory>./src/main/java</directory>
+    <directory>./another/source/path</directory>
+</scan-directories>
 ```
 
-### Configuration Elements
+### 2. Keywords (`keywords.xml`)
 
-#### Keywords
+Defines sensitive keywords to detect in log statements:
 
-Keywords define sensitive data identifiers to search for in log statements.
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<keywords>
+    <!-- Exact matches for variable names -->
+    <keyword type="plain">ssn</keyword>
+    <keyword type="plain">password</keyword>
+    <keyword type="plain">apiKey</keyword>
+    <keyword type="plain">creditCard</keyword>
+    <keyword type="plain">debitCard</keyword>
+    <keyword type="plain">pin</keyword>
+    <keyword type="plain">dateOfBirth</keyword>
+    <keyword type="plain">dob</keyword>
+    
+    <!-- Regex patterns for broader matching -->
+    <keyword type="regex">.*password.*</keyword>
+    <keyword type="regex">credit[Cc]ard.*</keyword>
+</keywords>
+```
 
-- `type="plain"`: Exact case-sensitive matching of variable/method names
-- `type="regex"`: Regular expression pattern matching
+### 3. Sensitive Object Types (`object-types.xml`)
 
-#### Sensitive Object Types
+Defines object types that should never be logged directly:
 
-Object types define classes or objects that should not be logged directly (e.g., HTTP requests/responses that may contain sensitive data).
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<sensitive-object-types>
+    <!-- Plain text object types -->
+    <object-type type="plain">request</object-type>
+    <object-type type="plain">response</object-type>
+    <object-type type="plain">httpResponse</object-type>
+    <object-type type="plain">apiResponse</object-type>
+    
+    <!-- Regex patterns for object types -->
+    <object-type type="regex">.*Request</object-type>
+    <object-type type="regex">.*Response</object-type>
+</sensitive-object-types>
+```
 
-- `type="plain"`: Exact case-sensitive matching of object names
-- `type="regex"`: Regular expression pattern matching
+### 4. Exclusions (`exclusions.xml`)
 
-## Detection Patterns
+Defines patterns to exclude from scan results:
 
-### Patterns That Will Be Detected
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<exclusions>
+    <!-- Ignore test data and mock files -->
+    <exclusion type="plain">test-data</exclusion>
+    <exclusion type="plain">Mock</exclusion>
+    <exclusion type="plain">Stub</exclusion>
+    
+    <!-- Ignore all files in test directories -->
+    <exclusion type="regex">.*src/test/.*</exclusion>
+    <exclusion type="regex">.*Test\.java</exclusion>
+</exclusions>
+```
 
-The scanner identifies the following patterns in log statements:
+### Hardcoded Configuration Mode
 
-#### 1. Variable Names
+For convenience, you can enable hardcoded configuration in `SensitiveDataScannerApp.java`:
+
+```java
+private static final boolean USE_HARDCODED_VALUES = true;
+private static final String HARDCODED_CONFIG_PATH = "./src/main/resources/config";
+```
+
+When enabled, the scanner will automatically use the specified configuration directory without requiring command-line arguments.
+
+---
+
+## 🔍 Detection Patterns
+
+The scanner is designed to catch a wide variety of logging patterns. Here are some examples of what it detects:
+
+### 1. Variable & Method Logging
 ```java
 String ssn = "123-45-6789";
-logger.info("User SSN: " + ssn);  // DETECTED: variable 'ssn'
+logger.info("User SSN: " + ssn);           // DETECTED: variable 'ssn'
+logger.debug("Password: " + getPassword()); // DETECTED: method 'getPassword'
 ```
 
-#### 2. Method Calls
+### 2. String Concatenation
 ```java
-logger.info("SSN: " + user.getSSN());  // DETECTED: method 'getSSN'
-logger.error("Card: " + card.getNumber());  // DETECTED if 'Number' matches pattern
+// Detects sensitive data mixed with strings
+System.out.println("Card Number: " + creditCardNumber); // DETECTED
 ```
 
-#### 3. String Concatenation
+### 3. StringBuilder Chains
 ```java
-logger.debug("Password: " + userPassword);  // DETECTED: variable 'userPassword'
-```
-
-#### 4. StringBuilder/StringBuffer (Single-line)
-```java
-logger.info(new StringBuilder().append("PIN: ").append(pin));  // DETECTED: variable 'pin'
-```
-
-#### 5. StringBuilder/StringBuffer (Multi-line)
-```java
+// Detects sensitive data appended to builders
 StringBuilder sb = new StringBuilder();
-sb.append("User: ");
-sb.append(username);
-sb.append(" SSN: ");
-sb.append(ssn);  // DETECTED: variable 'ssn'
+sb.append("User: ").append(username);
+sb.append(" PIN: ").append(userPin);       // DETECTED: variable 'userPin'
 logger.info(sb.toString());
 ```
 
-#### 6. String.join() and StringJoiner
+### 4. Object Dumping
 ```java
-logger.info(String.join(", ", email, phone));  // DETECTED: variables 'email', 'phone'
-```
-
-#### 7. Sensitive Object Logging
-```java
-logger.info("Request: " + request);  // DETECTED: object 'request'
-logger.debug(response.getBody());  // DETECTED: object 'response'
-logger.error("Response: " + httpResponse.body());  // DETECTED: object 'httpResponse'
-```
-
-#### 8. System.out and System.err Statements
-```java
-System.out.println("SSN: " + ssn);  // DETECTED: variable 'ssn'
-System.err.println("Error with password: " + password);  // DETECTED: variable 'password'
-System.out.print("User: " + username);  // DETECTED: variable 'username'
-System.err.printf("PIN: %s", pin);  // DETECTED: variable 'pin'
-```
-
-### Patterns That Will Be Ignored
-
-The scanner intelligently filters out false positives:
-
-#### 1. String Literals
-```java
-logger.info("123-45-6789");  // IGNORED: hardcoded string literal
-logger.info("SSN");  // IGNORED: just the word "SSN" in quotes
-System.out.println("password");  // IGNORED: just the word in quotes
-```
-
-#### 2. Method Signatures
-```java
-public void logUser(String ssn) {  // IGNORED: method parameter definition
-    // ...
-}
-
-private String getSSN() {  // IGNORED: method declaration
-    return this.ssn;
+// Detects when sensitive objects are logged directly
+public void process(HttpServletRequest request) {
+    logger.info("Incoming request: " + request); // DETECTED: object 'request'
 }
 ```
 
-#### 3. Non-logging Statements
+### 5. String.join()
 ```java
-String ssn = user.getSSN();  // IGNORED: not a log statement
-int result = calculateValue(password);  // IGNORED: not logging
+// Detects sensitive data in join operations
+String logMsg = String.join(", ", userId, authToken); // DETECTED: variable 'authToken'
 ```
 
-## Output Report
+---
 
-### HTML Report Structure
+## 🛡️ False Positive Reduction
 
-The scanner generates an HTML report with the following sections:
+To keep your report clean, the scanner intelligently ignores:
 
-1. Summary Section
-   - Scan date and time
-   - Total files scanned
-   - Total detections found
-   - Scan duration
+- **String Literals**: `logger.info("password")` (Safe: just the word "password")
+- **Method Signatures**: `public void setPassword(String password)` (Safe: definition, not usage)
+- **Non-Log Statements**: `String p = password;` (Safe: assignment, not logging)
 
-2. Detections Table
-   - File name
-   - Line number
-   - Matched keyword or pattern
-   - Complete log statement
+---
 
-### Sample Report Output
+## 📖 Usage Guide
 
-```
-Sensitive Data Scan Report
-==========================
+### Command Line Arguments
 
-Summary
--------
-Scan Date: 2025-11-20 12:34:56
-Total Files Scanned: 45
-Total Detections: 12
-Scan Duration: 1.23 seconds
+| Argument | Description | Required |
+|----------|-------------|----------|
+| `config-directory-path` | Path to the directory containing XML configuration files | No (if hardcoded mode enabled) |
+| `output-path` | Path for the output HTML report | No (defaults to `output/scan-report-{timestamp}.html`) |
 
-Detections
-----------
-File Name                    | Line | Matched Keyword | Log Statement
-----------------------------|------|-----------------|----------------------------------
-UserService.java            | 42   | ssn             | logger.info("SSN: " + ssn)
-PaymentProcessor.java       | 156  | creditCard      | log.debug("Card: " + card.getNumber())
-AuthController.java         | 89   | password        | logger.error("Failed: " + userPassword)
-RequestHandler.java         | 234  | request         | logger.info("Request: " + request)
+### Running the Scanner
+
+```bash
+# Using hardcoded configuration (if enabled)
+java -jar target/sensitive-data-scanner-1.0.0.jar
+
+# Specify configuration directory
+java -jar target/sensitive-data-scanner-1.0.0.jar ./src/main/resources/config
+
+# Specify both configuration directory and output path
+java -jar target/sensitive-data-scanner-1.0.0.jar ./src/main/resources/config ./reports/my-scan.html
 ```
 
-The report is saved with a timestamp in the filename (e.g., `scan-report-2025-11-20-123456.html`).
+### Running from IDE (IntelliJ / Eclipse)
 
-## Project Structure
+1. Open the project in your IDE
+2. Locate the main class: `com.scanner.SensitiveDataScannerApp`
+3. Create a Run Configuration:
+   - **Main Class**: `com.scanner.SensitiveDataScannerApp`
+   - **Program Arguments**: (optional) `./src/main/resources/config`
+   - **Working Directory**: Project root folder
+4. Run the configuration
+
+### Output
+
+The scanner generates:
+- **HTML Report**: Interactive report with all detections
+  - Default location: `output/scan-report-{timestamp}.html`
+  - Automatically creates the `output/` directory if it doesn't exist
+- **Console Output**: Summary of scan results and statistics
+
+---
+
+## 📊 Report Features
+
+The generated HTML report includes:
+
+- **Summary Dashboard**: Quick overview of scan results
+  - Total files scanned
+  - Total detections found
+  - Affected files count
+  - Scan duration
+  
+- **Interactive Table**: Detailed detection list with:
+  - File name and line number
+  - Matched keyword
+  - Full log statement context
+  - Sortable columns
+  - Real-time search and filtering
+  
+- **Export Options**: Export filtered results to CSV
+- **Theme Toggle**: Switch between light and dark modes
+- **Responsive Design**: Works on desktop and mobile devices
+
+---
+
+## 🏗️ Project Structure
 
 ```
-sensitive-data-scanner/
+NPIScanner/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/scanner/
-│   │   │   ├── SensitiveDataScannerApp.java      # Main entry point
-│   │   │   ├── ConfigurationLoader.java          # XML config parser
-│   │   │   ├── JavaFileScanner.java              # File system scanner
-│   │   │   ├── LogStatementAnalyzer.java         # Log statement detector
-│   │   │   ├── SensitiveDataDetector.java        # Pattern matching engine
-│   │   │   ├── HtmlReportGenerator.java          # Report generator
-│   │   │   ├── ScanConfiguration.java            # Config data model
-│   │   │   ├── KeywordPattern.java               # Keyword data model
-│   │   │   ├── LogStatement.java                 # Log statement data model
-│   │   │   ├── Detection.java                    # Detection data model
-│   │   │   ├── ScanStatistics.java               # Statistics data model
-│   │   │   └── exceptions/
-│   │   │       ├── ScannerException.java
-│   │   │       ├── ConfigurationException.java
-│   │   │       ├── ScanException.java
-│   │   │       └── ReportException.java
+│   │   │   ├── SensitiveDataScannerApp.java    # Main entry point
+│   │   │   ├── ConfigurationLoader.java        # Loads XML configurations
+│   │   │   ├── JavaFileScanner.java            # Scans for Java files
+│   │   │   ├── LogStatementAnalyzer.java       # Analyzes log statements
+│   │   │   ├── SensitiveDataDetector.java      # Detects sensitive data
+│   │   │   ├── HtmlReportGenerator.java        # Generates HTML reports
+│   │   │   └── ...                             # Other classes
 │   │   └── resources/
-│   │       └── sample-config.xml                 # Sample configuration
+│   │       └── config/                          # Configuration files
+│   │           ├── scan-directories.xml
+│   │           ├── keywords.xml
+│   │           ├── object-types.xml
+│   │           └── exclusions.xml
 │   └── test/
-│       ├── java/com/scanner/                     # Unit tests
-│       └── resources/                            # Test data files
-├── pom.xml
-└── README.md
+│       └── java/com/scanner/                    # Unit tests
+├── output/                                      # Generated reports (auto-created)
+├── pom.xml                                      # Maven configuration
+└── README.md                                    # This file
 ```
 
-## Error Handling
+---
 
-The scanner handles various error scenarios gracefully:
+## 📋 Requirements
 
-- Invalid or missing configuration file
-- Invalid regex patterns in configuration
-- Inaccessible directories or files
-- Malformed Java files
-- Permission denied errors
-- Report generation failures
+- **Java**: 8 or higher (tested with Java 17)
+- **Maven**: 3.6 or higher
+- **Operating System**: Windows, macOS, or Linux
 
-All errors are reported with clear messages to help diagnose issues.
+---
 
-## Best Practices
+## 🧪 Testing
 
-1. Start with the sample configuration and customize it for your needs
-2. Test your regex patterns carefully to avoid false positives
-3. Run the scanner regularly as part of your code review process
-4. Review the HTML report thoroughly and address all findings
-5. Keep your configuration file under version control
-6. Consider integrating the scanner into your CI/CD pipeline
+Run the test suite:
 
-## Limitations
+```bash
+# Run all tests
+mvn test
 
-- Only scans Java source files (.java extension)
-- Requires valid Java syntax (malformed files may be skipped)
-- Case-sensitive matching for plain text keywords
-- Does not analyze compiled bytecode or JAR files
-- Does not perform data flow analysis across methods
+# Run specific test class
+mvn test -Dtest=ConfigurationLoaderTest
 
-## Contributing
+# Run with coverage
+mvn clean test jacoco:report
+```
 
-Contributions are welcome! Please ensure all tests pass before submitting pull requests.
+---
 
-## License
+## 🤝 Contributing
+
+Contributions are welcome! Please ensure:
+
+1. All tests pass: `mvn clean test`
+2. Code follows existing style conventions
+3. New features include appropriate tests
+4. Documentation is updated
+
+---
+
+## 📄 License
 
 This project is provided as-is for security auditing purposes.
 
-## Support
+---
 
-For issues or questions, please refer to the project documentation or contact your security team.
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**Issue**: "Configuration directory not found"
+- **Solution**: Ensure the configuration directory path is correct and contains all required XML files
+
+**Issue**: "No Java files found"
+- **Solution**: Check that the scan directories in `scan-directories.xml` point to valid Java source directories
+
+**Issue**: "Report not generated"
+- **Solution**: Ensure the output directory is writable. The scanner will automatically create the `output/` directory if it doesn't exist
+
+**Issue**: Tests failing with "Configuration path is not a directory"
+- **Solution**: Tests expect directory-based configuration. Ensure test setup creates proper directory structures
+
+---
+
+## 📚 Additional Resources
+
+- [Configuration Examples](./src/main/resources/config/) - Sample configuration files
+- [Test Cases](./src/test/java/com/scanner/) - Example usage and test scenarios
+- [Interactive Report Template](./interactive-report-template.html) - HTML report template
+
+---
+
+## 🎯 Best Practices
+
+1. **Regular Scans**: Integrate into your CI/CD pipeline to catch issues early
+2. **Custom Keywords**: Tailor keywords to your domain-specific sensitive data
+3. **Review Reports**: Regularly review and act on findings
+4. **Update Exclusions**: Keep exclusion patterns up-to-date to reduce false positives
+5. **Version Control**: Track configuration changes in version control

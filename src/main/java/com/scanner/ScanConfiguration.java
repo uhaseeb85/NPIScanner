@@ -10,6 +10,7 @@ import java.util.List;
  * exclusions.
  */
 public class ScanConfiguration {
+    private final List<String> scanDirectories;
     private final List<KeywordPattern> patterns;
     private final List<KeywordPattern> sensitiveObjectTypes;
     private final List<KeywordPattern> exclusions;
@@ -22,7 +23,7 @@ public class ScanConfiguration {
      * @param sensitiveObjectTypes the list of sensitive object type patterns
      */
     public ScanConfiguration(List<KeywordPattern> patterns, List<KeywordPattern> sensitiveObjectTypes) {
-        this(patterns, sensitiveObjectTypes, null);
+        this(new ArrayList<>(), patterns, sensitiveObjectTypes, null);
     }
 
     /**
@@ -35,10 +36,36 @@ public class ScanConfiguration {
      */
     public ScanConfiguration(List<KeywordPattern> patterns, List<KeywordPattern> sensitiveObjectTypes,
             List<KeywordPattern> exclusions) {
+        this(new ArrayList<>(), patterns, sensitiveObjectTypes, exclusions);
+    }
+
+    /**
+     * Creates a ScanConfiguration with the specified directories, patterns,
+     * sensitive object
+     * types, and exclusions.
+     *
+     * @param scanDirectories      the list of directories to scan
+     * @param patterns             the list of keyword patterns to search for
+     * @param sensitiveObjectTypes the list of sensitive object type patterns
+     * @param exclusions           the list of exclusion patterns
+     */
+    public ScanConfiguration(List<String> scanDirectories, List<KeywordPattern> patterns,
+            List<KeywordPattern> sensitiveObjectTypes,
+            List<KeywordPattern> exclusions) {
+        this.scanDirectories = scanDirectories != null ? new ArrayList<>(scanDirectories) : new ArrayList<>();
         this.patterns = patterns != null ? new ArrayList<>(patterns) : new ArrayList<>();
         this.sensitiveObjectTypes = sensitiveObjectTypes != null ? new ArrayList<>(sensitiveObjectTypes)
                 : new ArrayList<>();
         this.exclusions = exclusions != null ? new ArrayList<>(exclusions) : new ArrayList<>();
+    }
+
+    /**
+     * Gets the list of directories to scan.
+     *
+     * @return an unmodifiable list of scan directories
+     */
+    public List<String> getScanDirectories() {
+        return Collections.unmodifiableList(scanDirectories);
     }
 
     /**
