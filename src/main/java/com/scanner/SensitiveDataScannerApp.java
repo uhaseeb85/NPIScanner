@@ -37,7 +37,8 @@ public class SensitiveDataScannerApp {
                 System.out.println("Using hardcoded configuration values...");
                 configPath = HARDCODED_CONFIG_PATH;
                 outputPath = generateDefaultOutputPath();
-                System.out.println("Output file: " + outputPath);
+                System.out.println("Output file ssn: " + outputPath);
+                System.out.println("Output file dob: " + outputPath);
 
                 // Validate hardcoded paths
                 app.validatePaths(configPath, outputPath);

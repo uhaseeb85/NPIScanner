@@ -6,7 +6,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Generates interactive HTML reports for sensitive data scan results.
@@ -586,6 +589,16 @@ public class HtmlReportGenerator {
                 "    overflow-x: auto;\n" +
                 "    color: var(--text-primary);\n" +
                 "}\n" +
+                ".keyword-badge {\n" +
+                "    color: var(--danger);\n" +
+                "    font-weight: 500;\n" +
+                "    padding: 0.125rem 0.375rem;\n" +
+                "    background: rgba(220, 53, 69, 0.1);\n" +
+                "    border-radius: 4px;\n" +
+                "    display: inline-block;\n" +
+                "    font-size: 0.75rem;\n" +
+                "    margin-right: 0.25rem;\n" +
+                "}\n" +
                 ".empty-state {\n" +
                 "    text-align: center;\n" +
                 "    padding: 4rem 2rem;\n" +
@@ -640,6 +653,13 @@ public class HtmlReportGenerator {
     private String buildDetectionTable(List<Detection> detections) {
         StringBuilder table = new StringBuilder();
 
+        // Group detections by file and line number
+        Map<String, List<Detection>> groupedDetections = new LinkedHashMap<>();
+        for (Detection detection : detections) {
+            String key = detection.getFileName() + ":" + detection.getLineNumber();
+            groupedDetections.computeIfAbsent(key, k -> new ArrayList<>()).add(detection);
+        }
+
         table.append("        <div class=\"table-container\">\n");
         table.append("            <table id=\"detectionsTable\" class=\"detections-table\">\n");
         table.append("                <thead>\n");
@@ -649,25 +669,45 @@ public class HtmlReportGenerator {
         table.append(
                 "                        <th class=\"sortable\" data-column=\"lineNumber\">Line <span class=\"sort-icon\">⇅</span></th>\n");
         table.append(
-                "                        <th class=\"sortable\" data-column=\"keyword\">Keyword <span class=\"sort-icon\">⇅</span></th>\n");
+                "                        <th class=\"sortable\" data-column=\"keyword\">Keywords <span class=\"sort-icon\">⇅</span></th>\n");
         table.append("                        <th>Log Statement</th>\n");
         table.append("                    </tr>\n");
         table.append("                </thead>\n");
         table.append("                <tbody id=\"tableBody\">\n");
 
-        for (Detection detection : detections) {
-            table.append("                    <tr data-file=\"").append(escapeHtml(detection.getFileName()))
-                    .append("\" data-line=\"").append(detection.getLineNumber())
-                    .append("\" data-keyword=\"").append(escapeHtml(detection.getMatchedKeyword()))
+        for (List<Detection> group : groupedDetections.values()) {
+            Detection first = group.get(0);
+
+            // Collect all keywords for this file/line
+            List<String> keywords = new ArrayList<>();
+            for (Detection d : group) {
+                keywords.add(d.getMatchedKeyword());
+            }
+            String allKeywords = String.join(",", keywords);
+
+            table.append("                    <tr data-file=\"").append(escapeHtml(first.getFileName()))
+                    .append("\" data-line=\"").append(first.getLineNumber())
+                    .append("\" data-keyword=\"").append(escapeHtml(allKeywords))
                     .append("\">\n");
-            table.append("                        <td class=\"file-name\">").append(escapeHtml(detection.getFileName()))
+            table.append("                        <td class=\"file-name\">").append(escapeHtml(first.getFileName()))
                     .append("</td>\n");
-            table.append("                        <td class=\"line-number\">").append(detection.getLineNumber())
+            table.append("                        <td class=\"line-number\">").append(first.getLineNumber())
                     .append("</td>\n");
-            table.append("                        <td class=\"keyword\">")
-                    .append(escapeHtml(detection.getMatchedKeyword())).append("</td>\n");
+            table.append("                        <td class=\"keyword\">");
+
+            // Display each keyword as a separate badge
+            for (int i = 0; i < keywords.size(); i++) {
+                if (i > 0) {
+                    table.append(" ");
+                }
+                table.append("<span class=\"keyword-badge\">")
+                        .append(escapeHtml(keywords.get(i)))
+                        .append("</span>");
+            }
+
+            table.append("</td>\n");
             table.append("                        <td class=\"log-statement\">")
-                    .append(escapeHtml(detection.getLogStatement())).append("</td>\n");
+                    .append(escapeHtml(first.getLogStatement())).append("</td>\n");
             table.append("                    </tr>\n");
         }
 
