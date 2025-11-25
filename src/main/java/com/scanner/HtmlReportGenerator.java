@@ -380,8 +380,7 @@ public class HtmlReportGenerator {
                 "    z-index: 100;\n" +
                 "}\n" +
                 ".header-content {\n" +
-                "    max-width: 1400px;\n" +
-                "    margin: 0 auto;\n" +
+                "    padding: 0 2rem;\n" +
                 "    display: flex;\n" +
                 "    justify-content: space-between;\n" +
                 "    align-items: center;\n" +
@@ -409,38 +408,37 @@ public class HtmlReportGenerator {
                 "    background: var(--bg-tertiary);\n" +
                 "}\n" +
                 ".container {\n" +
-                "    max-width: 1400px;\n" +
+                "    max-width: 95%;\n" +
                 "    margin: 0 auto;\n" +
                 "    padding: 2rem;\n" +
                 "}\n" +
-                ".summary-grid {\n" +
-                "    display: grid;\n" +
-                "    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));\n" +
-                "    gap: 1.5rem;\n" +
-                "    margin-bottom: 2.5rem;\n" +
-                "}\n" +
                 ".summary-card {\n" +
                 "    background: var(--bg-secondary);\n" +
-                "    padding: 1.5rem;\n" +
+                "    padding: 0.5rem 0.75rem;\n" +
                 "    border-radius: var(--radius-md);\n" +
                 "    border: 1px solid var(--border-color);\n" +
                 "    display: flex;\n" +
-                "    flex-direction: column;\n" +
+                "    flex-direction: row;\n" +
+                "    align-items: center;\n" +
                 "    gap: 0.5rem;\n" +
                 "}\n" +
                 ".card-icon {\n" +
-                "    font-size: 1.5rem;\n" +
-                "    margin-bottom: 0.5rem;\n" +
+                "    font-size: 1.25rem;\n" +
                 "    color: var(--text-secondary);\n" +
                 "}\n" +
+                ".card-content {\n" +
+                "    display: flex;\n" +
+                "    flex-direction: column;\n" +
+                "    gap: 0.125rem;\n" +
+                "}\n" +
                 ".card-value {\n" +
-                "    font-size: 2rem;\n" +
+                "    font-size: 1.25rem;\n" +
                 "    font-weight: 700;\n" +
                 "    color: var(--text-primary);\n" +
                 "    line-height: 1;\n" +
                 "}\n" +
                 ".card-label {\n" +
-                "    font-size: 0.875rem;\n" +
+                "    font-size: 0.7rem;\n" +
                 "    color: var(--text-secondary);\n" +
                 "    font-weight: 500;\n" +
                 "}\n" +
