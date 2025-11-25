@@ -14,7 +14,7 @@ Get up and running in minutes!
 
 2. **Build the Project**
    ```bash
-   mvn clean package
+   mvn clean install
    ```
 
 3. **Run the Scanner**
@@ -118,7 +118,7 @@ Defines sensitive keywords to detect in log statements:
 
 ### 3. Sensitive Object Types (`object-types.xml`)
 
-Defines object types that should never be logged directly:
+Defines object types that should never be logged directly: Behaves same as keywords scanning but separated for better organization
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -152,17 +152,6 @@ Defines patterns to exclude from scan results:
     <exclusion type="regex">.*Test\.java</exclusion>
 </exclusions>
 ```
-
-### Hardcoded Configuration Mode
-
-For convenience, you can enable hardcoded configuration in `SensitiveDataScannerApp.java`:
-
-```java
-private static final boolean USE_HARDCODED_VALUES = true;
-private static final String HARDCODED_CONFIG_PATH = "./src/main/resources/config";
-```
-
-When enabled, the scanner will automatically use the specified configuration directory without requiring command-line arguments.
 
 ---
 
