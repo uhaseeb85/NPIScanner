@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * Detects sensitive data in log statements by analyzing variables, method
  * calls,
- * and other patterns that may expose sensitive information.
+ * and other patterns that may expose sensitive information (PII/PHI).
  */
 public class SensitiveDataDetector {
 
